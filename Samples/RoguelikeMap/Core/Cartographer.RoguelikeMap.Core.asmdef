@@ -1,0 +1,18 @@
+{
+    "name": "Cartographer.RoguelikeMap.Core",
+    "rootNamespace": "",
+    "references": [
+        "GUID:853dae3dc500124498e21e0ad721ef19",
+        "GUID:65087af2843554543936ad41698fd94b",
+        "GUID:52b0df07ee31c85479205b565366bb9f"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

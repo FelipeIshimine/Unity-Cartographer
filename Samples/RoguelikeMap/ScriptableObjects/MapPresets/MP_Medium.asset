@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d634a0ece07b4a6e8bbd8786bfa64813, type: 3}
+  m_Name: MP_Medium
+  m_EditorClassIdentifier: 
+  <Source>k__BackingField:
+    rid: 8563644459087036511
+  references:
+    version: 2
+    RefIds:
+    - rid: 8563644459087036511
+      type: {class: SimpleRoguelikeMap, ns: Cartographer.RoguelikeMap.Core.Sources, asm: Cartographer.RoguelikeMap.Core}
+      data:
+        <Floors>k__BackingField: 6
+        RandomSeed:
+          enabled: 1
+          value: 0
+        AddUniqueStart: 0
+        AddUniqueEnd: 0
+        MaxFloorLength:
+          enabled: 1
+          value: 4
+        NodesDensity: 0.5
+        <AllowOverlappingPaths>k__BackingField: 0

@@ -1,0 +1,26 @@
+{
+	"name":"ishimine.cartographer",
+	"version":"0.0.1",
+	"displayName":"Cartographer",
+	"unity":"2022.1",
+	"description":"For making easy, node base procedural maps. Includes examples for making Roguelike-Maps, Skill-Trees, etc",
+	"author": {
+    "name": "Felipe Ishimine",
+    "email": "felipeishimine@gmail.com",
+    "url": "https://felipeishimine.github.io/"
+  },
+  "keywords": [
+    "events",
+    "scriptable objects",
+    "variable",
+    "reference",
+    "game event"
+  ],
+  "samples": [
+        {
+            "displayName": "Roguelike Maps",
+            "description": "Example for a complex procedural Roguelike Maps",
+            "path": "Samples/RoguelikeMap"
+        }
+    ]
+}

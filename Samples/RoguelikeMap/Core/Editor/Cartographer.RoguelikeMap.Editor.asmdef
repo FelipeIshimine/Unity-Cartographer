@@ -1,0 +1,18 @@
+﻿{
+    "name": "Cartographer.RoguelikeMap.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:a7edbe7a0cf74a82a59c5902b900e214"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

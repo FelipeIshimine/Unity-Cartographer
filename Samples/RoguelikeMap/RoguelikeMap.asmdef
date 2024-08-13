@@ -1,0 +1,16 @@
+{
+    "name": "RoguelikeMap",
+    "rootNamespace": "",
+    "references": [
+        "GUID:853dae3dc500124498e21e0ad721ef19"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
