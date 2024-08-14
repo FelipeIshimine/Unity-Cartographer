@@ -93,6 +93,8 @@ public class GraphToolbar : Overlay, ITransientOverlay
 			text = "Nodes"
 		};
 
+		listFoldout.style.maxHeight = 100;
+
 		content.Add(listFoldout);
 	}
 	
@@ -107,12 +109,6 @@ public class GraphToolbar : Overlay, ITransientOverlay
 
 		content.Q<Label>("graph-name").text = graphTool.name;
 		
-		Debug.Log("RefreshContent");
-
-		if (index != -1 && SceneView.lastActiveSceneView)
-		{
-			SceneView.lastActiveSceneView.Frame(new Bounds(graphTool.graph.GetWorldPosition(index), Vector3.one*10), false);
-		}
 		
 		if (graphTool && content != null)
 		{
@@ -138,6 +134,11 @@ public class GraphToolbar : Overlay, ITransientOverlay
 
 				var button = new ToolbarButton(() =>
 				{
+					if (index != -1 && SceneView.lastActiveSceneView)
+					{
+						SceneView.lastActiveSceneView.Frame(new Bounds(graphTool.graph.GetWorldPosition(index), Vector3.one*10), false);
+					}
+
 					graphTool.Select(aux);
 					RefreshContent(aux);
 				})

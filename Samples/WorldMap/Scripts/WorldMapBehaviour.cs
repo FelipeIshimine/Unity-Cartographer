@@ -1,7 +1,7 @@
 ﻿using Cartographer.Core;
 using UnityEngine;
 
-namespace Samples.WorldMap
+namespace Cartographer.WorldMap
 {
 	[RequireComponent(typeof(GraphBehaviour))]
 	public class WorldMapBehaviour : MonoBehaviour
