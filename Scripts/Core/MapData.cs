@@ -17,6 +17,7 @@ namespace Cartographer.Core
 
 		[SerializeField] protected GraphData graph = new();
 		[SerializeReference,TypeDropdown] protected internal List<NodeData> content = new();
+		
 		public IReadOnlyList<NodeData> Content => content;
 
 		public MapData()

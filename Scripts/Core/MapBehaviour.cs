@@ -115,7 +115,4 @@ namespace Cartographer.Core
 		public IEnumerable<EdgeData> FindAllEdgeOut(int id) => data.FindOutEdges(id);
 		
 	}
-	
-	
-	
 }

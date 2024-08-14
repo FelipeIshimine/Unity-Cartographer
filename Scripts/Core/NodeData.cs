@@ -8,7 +8,5 @@
 
 	public abstract class NodeData<T, TB> : NodeData where T : NodeData<T, TB>, new() where TB : NodeType<TB, T>
 	{
-	} 
-
-	
+	}
 }

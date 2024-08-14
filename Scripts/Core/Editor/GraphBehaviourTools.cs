@@ -3,32 +3,43 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.EditorTools;
-using UnityEditor.Overlays;
 using UnityEditor.ShortcutManagement;
-using UnityEditor.UIElements;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace Cartographer.Core.Editor
 {
-	[EditorTool("Map Tool", typeof(MapBehaviour))]
-	public class MapBehaviourTools : EditorTool, IDrawSelectedHandles
+	[EditorTool("Graph Tool", typeof(GraphBehaviour))]
+	public class GraphBehaviourTools : EditorTool, IDrawSelectedHandles
 	{
-		public event Action<MapBehaviour> OnMapChange; 
+		private GUIContent toolIcon;
+		public override GUIContent toolbarIcon
+		{
+			get
+			{
+				if (toolIcon == null)
+				{
+					toolIcon = new GUIContent(AssetDatabase.LoadAssetAtPath<Texture>("Packages/ishimine.cartographer/Icons/Map Icon.png"));
+				}
+				return toolIcon;
+			}
+		}
+		
+		
+		public event Action<GraphBehaviour> OnMapChange; 
 		public event Action<int> OnIndexChange; 
 		private const float ARROW_OFFSET = .5f;
 		private const float SIDE_OFFSET = .1f;
 
-		private int selectedIndex = -1;
 		private Vector3[] gizmoLines = Array.Empty<Vector3>();
 
 		readonly Dictionary<(int from,int to),int> arrowsCountDict = new();
 
-		public static MapBehaviourTools Instance { get; private set; }
+		public static GraphBehaviourTools Instance { get; private set; }
 
 		private readonly HashSet<EdgeData> connectionsOut = new HashSet<EdgeData>();
 		private readonly HashSet<EdgeData> connectionsIn = new HashSet<EdgeData>();
-		
+
+		private int selectedIndex = -1;
 		public int SelectedIndex
 		{
 			get => selectedIndex;
@@ -37,22 +48,26 @@ namespace Cartographer.Core.Editor
 				if(selectedIndex != value)
 				{
 					selectedIndex = value;
-					connectionsIn.Clear();
-					connectionsOut.Clear();
-
-					if (selectedIndex != -1)
-					{
-						FindAllConnectionsOut(selectedIndex);
-						FindAllConnectionsIn(selectedIndex);
-					}
+					RefreshConnections();
 					OnIndexChange?.Invoke(value);
 				}
 			}
 		}
 
+		private void RefreshConnections()
+		{
+			connectionsIn.Clear();
+			connectionsOut.Clear();
+			if (selectedIndex != -1)
+			{
+				FindAllConnectionsOut(selectedIndex);
+				FindAllConnectionsIn(selectedIndex);
+			}
+		}
+
 		private void FindAllConnectionsIn(int i)
 		{
-			foreach (var edge in Map.FindAllEdgeIn(i))
+			foreach (var edge in GetGraph().FindAllEdgeIn(i))
 			{
 				if (connectionsIn.Add(edge))
 				{
@@ -64,7 +79,7 @@ namespace Cartographer.Core.Editor
 
 		private void FindAllConnectionsOut(int i)
 		{
-			foreach (var edge in Map.FindAllEdgeOut(i))
+			foreach (var edge in GetGraph().FindAllEdgeOut(i))
 			{
 				if (connectionsOut.Add(edge))
 				{
@@ -73,54 +88,67 @@ namespace Cartographer.Core.Editor
 			}
 		}
 
-		public MapBehaviour map;
-		public MapBehaviour Map
+		public GraphBehaviour graph;
+		public GraphBehaviour GetGraph() => graph;
+
+		public void SetGraph(GraphBehaviour value)
 		{
-			get => map;
-			set
+			if (graph != value)
 			{
-				if(map != value)
+				RefreshConnections();
+				SelectedIndex = -1;
+				
+				if (graph != null)
 				{
-					SelectedIndex = -1;
-					if (map != null)
-					{
-						map.OnLoad -= SetMap;
-					}
-					map = value;
-					if (map != null)
-					{
-						map.OnLoad += SetMap;
-					}
-					OnMapChange?.Invoke(map);
+					graph.OnLoad -= SetGraph;
+					graph.data.OnAddEdge -= OnEdgeAdded;
+					graph.data.OnRemoveEdge -= OnEdgeRemoved;
 				}
+
+				graph = value;
+				
+				
+				if (graph != null)
+				{
+					graph.OnLoad += SetGraph;
+					graph.data.OnAddEdge += OnEdgeAdded;
+					graph.data.OnRemoveEdge += OnEdgeRemoved;
+				}
+
+				OnMapChange?.Invoke(graph);
 			}
 		}
 
-		private void SetMap(MapBehaviour obj)
+		private void OnEdgeAdded(EdgeData edge)
 		{
-			Map = null;
-			Map = obj;
+			RefreshConnections();
+		}
+
+		private void OnEdgeRemoved(EdgeData edge)
+		{
+			RefreshConnections();
 		}
 
 
-		static MapBehaviourTools()
+		static GraphBehaviourTools()
 		{
+			Selection.selectionChanged -= OnSelectionChange;
 			Selection.selectionChanged += OnSelectionChange;
 		}
 
 		private static void OnSelectionChange()
 		{
-			if (Selection.GetFiltered<MapBehaviour>(SelectionMode.TopLevel).Length > 0)
+			if (Selection.GetFiltered<GraphBehaviour>(SelectionMode.TopLevel).Length > 0)
 			{
-				ToolManager.SetActiveTool<MapBehaviourTools>();
+				ToolManager.SetActiveTool<GraphBehaviourTools>();
 			}
 		}
 
 		[Shortcut("Activate Map Tool", typeof(SceneView), KeyCode.M)]
 		static void PlatformToolShortcut()
 		{
-			if (Selection.GetFiltered<MapBehaviour>(SelectionMode.TopLevel).Length > 0)
-				ToolManager.SetActiveTool<MapBehaviourTools>();
+			if (Selection.GetFiltered<GraphBehaviour>(SelectionMode.TopLevel).Length > 0)
+				ToolManager.SetActiveTool<GraphBehaviourTools>();
 			else
 				Debug.Log("No map selected!");
 		}
@@ -147,13 +175,13 @@ namespace Cartographer.Core.Editor
 			}
 
 			
-			if (target is MapBehaviour mapBehaviour)
+			if (target is GraphBehaviour graphBehaviour)
 			{
-				Map = mapBehaviour;
+				SetGraph(graphBehaviour);
 				var currentEvent = Event.current;
 				
 				
-				var mousePosition = GetMouseIntersectionPosition(mapBehaviour, currentEvent);
+				var mousePosition = GetMouseIntersectionPosition(graphBehaviour, currentEvent);
 
 				if (!currentEvent.shift && currentEvent.alt)
 				{
@@ -165,7 +193,7 @@ namespace Cartographer.Core.Editor
 					currentEvent.Use();
 				}*/
 				
-				if (TryHandleNodeDeletion(mapBehaviour, sceneView, mousePosition))
+				if (TryHandleNodeDeletion(graphBehaviour, sceneView, mousePosition))
 				{
 					return;
 				}
@@ -173,53 +201,50 @@ namespace Cartographer.Core.Editor
 				
 				if (SelectedIndex == -1)
 				{
-				
-					
-					if (TryHandleNodeCreation(mapBehaviour,mousePosition))
+					if (TryHandleNodeCreation(graphBehaviour,mousePosition))
 					{
 						return;
 					}
 
 					
-					
-					if (TryHandleNodeSelection(mapBehaviour,sceneView,mousePosition))
+					if (TryHandleNodeSelection(graphBehaviour,sceneView,mousePosition))
 					{
 						return;
 					}
 				}
 				else
 				{
-					if (TryHandleEdgeDeletion(mapBehaviour, sceneView, mousePosition))
+					if (TryHandleEdgeDeletion(graphBehaviour, sceneView, mousePosition))
 					{
 						return;
 					}
 					
-					if (TryHandleSelectionDisplacement(mapBehaviour, mousePosition))
+					if (TryHandleSelectionDisplacement(graphBehaviour, mousePosition))
 					{
 						return;
 					}
 						
-					if (TryHandleMerge(mapBehaviour, mousePosition))
+					if (TryHandleMerge(graphBehaviour, mousePosition))
 					{
 						return;
 					}
 					
-					if (TryHandleEdgeCreation(mapBehaviour,mousePosition))
+					if (TryHandleEdgeCreation(graphBehaviour,mousePosition))
 					{
 						return;
 					}
 
-					if (TryHandleNodeCreationWithEdge(mapBehaviour, mousePosition))
+					if (TryHandleNodeCreationWithEdge(graphBehaviour, mousePosition))
 					{
 						return;
 					}
 					
-					if (TryHandleNodeSelection(mapBehaviour,sceneView, mousePosition))
+					if (TryHandleNodeSelection(graphBehaviour,sceneView, mousePosition))
 					{
 						return;
 					}
 					
-					if(TryHandleDeselect(mapBehaviour))
+					if(TryHandleDeselect(graphBehaviour))
 					{
 						return;
 					}
@@ -243,26 +268,26 @@ namespace Cartographer.Core.Editor
 
 		}
 
-		private bool TryHandleMerge(MapBehaviour mapBehaviour, Vector3 mousePosition)
+		private bool TryHandleMerge(GraphBehaviour graphBehaviour, Vector3 mousePosition)
 		{
 			var currentEvent = Event.current;
 			if (SelectedIndex != -1 &&
 			    currentEvent.shift && 
 			    currentEvent.alt)
 			{
-				if(TryFindClosestNode(mapBehaviour, mousePosition, out var targetIndex))
+				if(TryFindClosestNode(graphBehaviour, mousePosition, out var targetIndex))
 				{
 					if (currentEvent.type is EventType.MouseDown && currentEvent.button == 0)
 					{
-						Undo.RecordObject(mapBehaviour, $"Merge Nodes {SelectedIndex} => {targetIndex}");
-						mapBehaviour.data.Merge(SelectedIndex, targetIndex);
+						Undo.RecordObject(graphBehaviour, $"Merge Nodes {SelectedIndex} => {targetIndex}");
+						graphBehaviour.data.Merge(SelectedIndex, targetIndex);
 					}
 					else
 					{
 						Handles.color = Color.yellow;
 
-						var start = mapBehaviour.GetWorldPosition(SelectedIndex);
-						var end = mapBehaviour.GetWorldPosition(targetIndex);
+						var start = graphBehaviour.GetWorldPosition(SelectedIndex);
+						var end = graphBehaviour.GetWorldPosition(targetIndex);
 
 						var dir = (end - start).normalized;
 
@@ -287,23 +312,23 @@ namespace Cartographer.Core.Editor
 				else
 				{
 					Handles.color = Color.yellow;
-					Handles.DrawLines(DrawArrow.CreatePoints(mapBehaviour.GetWorldPosition(SelectedIndex),mousePosition).ToArray());
+					Handles.DrawLines(DrawArrow.CreatePoints(graphBehaviour.GetWorldPosition(SelectedIndex),mousePosition).ToArray());
 					Handles.color = Color.white;
 				}
 			}
 			return false;
 		}
 
-		private bool TryHandleEdgeDeletion(MapBehaviour mapBehaviour, SceneView sceneView, Vector3 mousePosition)
+		private bool TryHandleEdgeDeletion(GraphBehaviour GraphBehaviour, SceneView sceneView, Vector3 mousePosition)
 		{
 			var current = Event.current;
 			if (current.control && 
 			    current.shift &&
-			    TryFindClosestNode(mapBehaviour, mousePosition, out var index))
+			    TryFindClosestNode(GraphBehaviour, mousePosition, out var index))
 			{
-				var pos = mapBehaviour.GetWorldPosition(index);
+				var pos = GraphBehaviour.GetWorldPosition(index);
 
-				var start = mapBehaviour.GetWorldPosition(SelectedIndex);
+				var start = GraphBehaviour.GetWorldPosition(SelectedIndex);
 				var end = pos;
 
 				var dir = (end - start).normalized;
@@ -317,7 +342,7 @@ namespace Cartographer.Core.Editor
 				
 				if (current.type is EventType.MouseDown)
 				{
-					mapBehaviour.RemoveEdge(SelectedIndex, index);
+					GraphBehaviour.RemoveEdge(SelectedIndex, index);
 				}
 				return true;
 			}
@@ -325,7 +350,7 @@ namespace Cartographer.Core.Editor
 			return false;
 		}
 
-		private bool TryHandleNodeCreationWithEdge(MapBehaviour mapBehaviour, Vector3 mousePosition)
+		private bool TryHandleNodeCreationWithEdge(GraphBehaviour GraphBehaviour, Vector3 mousePosition)
 		{
 			var current = Event.current;
 
@@ -335,48 +360,48 @@ namespace Cartographer.Core.Editor
 				    current.type is EventType.MouseDown &&
 				    current.button == 0)
 				{
-					Undo.RecordObject(mapBehaviour, "Node Created");
-					int index = mapBehaviour.AddNodeAtWorldPosition(mousePosition);
-					mapBehaviour.Connect(SelectedIndex, index);
+					Undo.RecordObject(GraphBehaviour, "Node Created");
+					int index = GraphBehaviour.AddNodeAtWorldPosition(mousePosition);
+					GraphBehaviour.Connect(SelectedIndex, index);
 					SelectedIndex = index;
 					return true;
 				}
 
 				var oldMatrix = Handles.matrix;
 
-				Handles.matrix = mapBehaviour.transform.localToWorldMatrix;
+				Handles.matrix = GraphBehaviour.transform.localToWorldMatrix;
 				Handles.color = Color.yellow;
-				Handles.DrawWireDisc(mapBehaviour.transform.InverseTransformPoint(mousePosition),mapBehaviour.transform.up, ARROW_OFFSET);
+				Handles.DrawWireDisc(GraphBehaviour.transform.InverseTransformPoint(mousePosition),GraphBehaviour.transform.up, ARROW_OFFSET);
 				Handles.color = Color.white;
 				Handles.matrix = oldMatrix;
 				
 				
 				
-				Handles.DrawLines(DrawArrow.CreatePoints(mapBehaviour.GetWorldPosition(SelectedIndex), mousePosition).ToArray());
+				Handles.DrawLines(DrawArrow.CreatePoints(GraphBehaviour.GetWorldPosition(SelectedIndex), mousePosition).ToArray());
 				
 			}
 
 			return false;
 		}
 
-		private bool TryHandleSelectionDisplacement(MapBehaviour mapBehaviour, Vector3 mousePosition)
+		private bool TryHandleSelectionDisplacement(GraphBehaviour GraphBehaviour, Vector3 mousePosition)
 		{
 			EditorGUI.BeginChangeCheck();
 
-			var position = Handles.PositionHandle(mapBehaviour.GetWorldPosition(SelectedIndex), mapBehaviour.transform.rotation);
+			var position = Handles.PositionHandle(GraphBehaviour.GetWorldPosition(SelectedIndex), GraphBehaviour.transform.rotation);
 
 			
 			if (EditorGUI.EndChangeCheck())
 			{
-				Undo.RecordObject(mapBehaviour, "Node Position Set");
-				mapBehaviour.SetWorldPosition(SelectedIndex, position);
+				Undo.RecordObject(GraphBehaviour, "Node Position Set");
+				GraphBehaviour.SetWorldPosition(SelectedIndex, position);
 				return true;
 			}
 
 			return false;
 		}
 
-		private bool TryHandleDeselect(MapBehaviour mapBehaviour)
+		private bool TryHandleDeselect(GraphBehaviour GraphBehaviour)
 		{
 			var currentEvent = Event.current;
 			
@@ -392,31 +417,31 @@ namespace Cartographer.Core.Editor
 			return false;
 		}
 
-		private bool TryHandleNodeDeletion(MapBehaviour mapBehaviour, SceneView sceneView, Vector3 mousePosition)
+		private bool TryHandleNodeDeletion(GraphBehaviour graphBehaviour, SceneView sceneView, Vector3 mousePosition)
 		{
 			var currentEvent = Event.current;
 
 			if (currentEvent.control &&
 			    !currentEvent.shift)
 			{
-				if(TryFindClosestNode(mapBehaviour, mousePosition, out int targetIndex))
+				if(TryFindClosestNode(graphBehaviour, mousePosition, out int targetIndex, 1,false))
 				{
 					Handles.color = Color.red;
 					
 					Handles.DrawWireDisc(
-						mapBehaviour.GetWorldPosition(targetIndex),
-						mapBehaviour.transform.up, 
+						graphBehaviour.GetWorldPosition(targetIndex),
+						graphBehaviour.transform.up, 
 						ARROW_OFFSET
 						);
 					
 					if (currentEvent.button == 0 &&
 					    currentEvent.type is EventType.MouseDown)
 					{
-						Undo.RecordObject(mapBehaviour, "Delete Node");
-						mapBehaviour.Remove(targetIndex);
+						Undo.RecordObject(graphBehaviour, "Delete Node");
+						graphBehaviour.Remove(targetIndex);
 						currentEvent.Use();
 
-						if (mapBehaviour.Count == SelectedIndex)
+						if (graphBehaviour.Count == SelectedIndex)
 						{
 							SelectedIndex = targetIndex;
 						}
@@ -430,27 +455,28 @@ namespace Cartographer.Core.Editor
 			return false;
 		}
 
-		private bool TryHandleEdgeCreation(MapBehaviour mapBehaviour, Vector3 mousePosition)
+		private bool TryHandleEdgeCreation(GraphBehaviour graphBehaviour, Vector3 mousePosition)
 		{
 			var currentEvent = Event.current;
 			if (SelectedIndex != -1 &&
 			    currentEvent.shift)
 			{
-				if(TryFindClosestNode(mapBehaviour, mousePosition, out var targetIndex))
+				if(TryFindClosestNode(graphBehaviour, mousePosition, out var targetIndex))
 				{
 					if (currentEvent.type is EventType.MouseDown && currentEvent.button == 0)
 					{
-						Undo.RecordObject(mapBehaviour, $"Create Edge {SelectedIndex} => {targetIndex}");
-						mapBehaviour.Connect(SelectedIndex, targetIndex);
+						Undo.RecordObject(graphBehaviour, $"Create Edge {SelectedIndex} => {targetIndex}");
+						graphBehaviour.Connect(SelectedIndex, targetIndex);
 					}
 					else
 					{
 						Handles.color = Color.yellow;
 
-						var start = mapBehaviour.GetWorldPosition(SelectedIndex);
-						var end = mapBehaviour.GetWorldPosition(targetIndex);
+						var start = graphBehaviour.GetWorldPosition(SelectedIndex);
+						var end = graphBehaviour.GetWorldPosition(targetIndex);
 
 						var dir = (end - start).normalized;
+						Handles.DrawWireDisc(end, graph.transform.up, ARROW_OFFSET);
 
 						if (dir != Vector3.zero)
 						{
@@ -463,7 +489,10 @@ namespace Cartographer.Core.Editor
 									start,
 									end
 								).ToArray());
+							
+							
 							Handles.color = Color.white;
+							
 							
 						}
 					}
@@ -473,29 +502,34 @@ namespace Cartographer.Core.Editor
 				else
 				{
 					Handles.color = Color.yellow;
-					Handles.DrawLines(DrawArrow.CreatePoints(mapBehaviour.GetWorldPosition(SelectedIndex),mousePosition).ToArray());
+					Handles.DrawLines(DrawArrow.CreatePoints(graphBehaviour.GetWorldPosition(SelectedIndex),mousePosition).ToArray());
 					Handles.color = Color.white;
 				}
 			}
 			return false;
 		}
 
-		private bool TryFindClosestNode(MapBehaviour mapBehaviour, Vector3 mousePosition, out int index, float worldMinDistance=1)
+		private bool TryFindClosestNode(GraphBehaviour graphBehaviour, Vector3 mousePosition, out int index, float worldMinDistance=1, bool scaleWithCameraDistance = false)
 		{
 			float minDistance = float.MaxValue;
 			index = -1;
-			for (int i = 0; i < mapBehaviour.Count; i++)
+			for (int i = 0; i < graphBehaviour.Count; i++)
 			{
 				if (i == SelectedIndex)
 				{
 					continue;
 				}
 
-				var pos = mapBehaviour.GetWorldPosition(i);
+				var pos = graphBehaviour.GetWorldPosition(i);
 
 				var distance = Vector3.Distance(pos, mousePosition);
-				float selectionDistance = HandleUtility.GetHandleSize(pos) * worldMinDistance;
-						
+				float selectionDistance = worldMinDistance;
+
+				if (scaleWithCameraDistance)
+				{
+					selectionDistance *= HandleUtility.GetHandleSize(pos);
+				}
+				
 				if (distance < selectionDistance && distance < minDistance)
 				{
 					minDistance = distance;
@@ -505,29 +539,29 @@ namespace Cartographer.Core.Editor
 			return index != -1;
 		}
 
-		private static Vector3 GetMouseIntersectionPosition(MapBehaviour mapBehaviour, Event currentEvent)
+		private static Vector3 GetMouseIntersectionPosition(GraphBehaviour graphBehaviour, Event currentEvent)
 		{
-			Plane plane = new Plane(mapBehaviour.transform.up, mapBehaviour.transform.position);
+			Plane plane = new Plane(graphBehaviour.transform.up, graphBehaviour.transform.position);
 			Ray ray = HandleUtility.GUIPointToWorldRay(currentEvent.mousePosition);
 			plane.Raycast(ray, out var clickDistance);
 			var mousePosition = ray.GetPoint(clickDistance);
 			return mousePosition;
 		}
 
-		private bool TryHandleNodeSelection(MapBehaviour mapBehaviour, SceneView sceneView, Vector3 mousePosition)
+		private bool TryHandleNodeSelection(GraphBehaviour graphBehaviour, SceneView sceneView, Vector3 mousePosition)
 		{
 			if (SelectedIndex != -1)
 			{
 				Handles.color = Color.yellow;
-				var pos = mapBehaviour.GetWorldPosition(SelectedIndex);
+				var pos = graphBehaviour.GetWorldPosition(SelectedIndex);
 				Handles.DrawWireDisc(pos, sceneView.camera.transform.forward, ARROW_OFFSET);
 				Handles.color = Color.white;
 			}
 
-			if (TryFindClosestNode(mapBehaviour, mousePosition, out var targetIndex))
+			if (TryFindClosestNode(graphBehaviour, mousePosition, out var targetIndex, 1, false))
 			{
 				if (Handles.Button(
-					    mapBehaviour.GetWorldPosition(targetIndex),
+					    graphBehaviour.GetWorldPosition(targetIndex),
 					    sceneView.camera.transform.rotation,
 					    ARROW_OFFSET,
 					    .3f,
@@ -537,12 +571,12 @@ namespace Cartographer.Core.Editor
 					SelectedIndex = targetIndex;
 					return true;
 				}
-				Handles.DrawWireDisc(mapBehaviour.GetWorldPosition(targetIndex), sceneView.camera.transform.forward, ARROW_OFFSET);
+				Handles.DrawWireDisc(graphBehaviour.GetWorldPosition(targetIndex), sceneView.camera.transform.forward, ARROW_OFFSET);
 			}
 			return false;
 		}
 
-		private static bool TryHandleNodeCreation(MapBehaviour mapBehaviour, Vector3 mousePosition)
+		private static bool TryHandleNodeCreation(GraphBehaviour graphBehaviour, Vector3 mousePosition)
 		{
 			var currentEvent = Event.current;
 			if (currentEvent.control)
@@ -550,17 +584,17 @@ namespace Cartographer.Core.Editor
 				if(currentEvent.type is EventType.MouseDown && 
 				   currentEvent.button == 0)
 				{
-					Undo.RecordObject(mapBehaviour, "Node Created");
-					mapBehaviour.AddNodeAtWorldPosition(mousePosition);
+					Undo.RecordObject(graphBehaviour, "Node Created");
+					graphBehaviour.AddNodeAtWorldPosition(mousePosition);
 					return true;
 				}
 				else
 				{
 					var oldMatrix = Handles.matrix;
 
-					Handles.matrix = mapBehaviour.transform.localToWorldMatrix;
+					Handles.matrix = graphBehaviour.transform.localToWorldMatrix;
 					Handles.color = Color.yellow;
-					Handles.DrawWireDisc(mapBehaviour.transform.InverseTransformPoint(mousePosition),mapBehaviour.transform.up, ARROW_OFFSET);
+					Handles.DrawWireDisc(graphBehaviour.transform.InverseTransformPoint(mousePosition),graphBehaviour.transform.up, ARROW_OFFSET);
 					Handles.color = Color.white;
 					Handles.matrix = oldMatrix;
 				}
@@ -573,7 +607,7 @@ namespace Cartographer.Core.Editor
 		{
 			foreach (var o in targets)
 			{
-				if (o is MapBehaviour behaviour)
+				if (o is GraphBehaviour behaviour)
 				{
 					Handles.color = Color.yellow;
 					Handles.DrawWireDisc(behaviour.transform.position, behaviour.transform.up, ARROW_OFFSET-.1f);
@@ -587,8 +621,8 @@ namespace Cartographer.Core.Editor
 			List<Vector3> selectionLines = new List<Vector3>(connectionsOut.Count * 2);
 			foreach (EdgeData edgeData in connectionsOut)
 			{
-				selectionLines.Add(map.GetWorldPosition(edgeData.From));
-				selectionLines.Add(map.GetWorldPosition(edgeData.To));
+				selectionLines.Add(graph.GetWorldPosition(edgeData.From));
+				selectionLines.Add(graph.GetWorldPosition(edgeData.To));
 			}
 			Handles.DrawLines(selectionLines.ToArray());
 			
@@ -596,14 +630,14 @@ namespace Cartographer.Core.Editor
 			selectionLines = new List<Vector3>(connectionsIn.Count * 2);
 			foreach (EdgeData edgeData in connectionsIn)
 			{
-				selectionLines.Add(map.GetWorldPosition(edgeData.From));
-				selectionLines.Add(map.GetWorldPosition(edgeData.To));
+				selectionLines.Add(graph.GetWorldPosition(edgeData.From));
+				selectionLines.Add(graph.GetWorldPosition(edgeData.To));
 			}
 			Handles.DrawLines(selectionLines.ToArray());
 			
 		}
 
-		private void DrawArrows(MapBehaviour map)
+		private void DrawArrows(GraphBehaviour map)
 		{
 			arrowsCountDict.Clear();
 			Handles.color = Color.white;
@@ -670,7 +704,7 @@ namespace Cartographer.Core.Editor
 			}
 		}
 
-		private void DrawNumberHandles(MapBehaviour map)
+		private void DrawNumberHandles(GraphBehaviour map)
 		{
 			GUIStyle textStyle = new GUIStyle()
 			{
@@ -716,134 +750,14 @@ namespace Cartographer.Core.Editor
 		{
 			SceneView.lastActiveSceneView.ShowNotification(new GUIContent("Exiting Map Tool"), .1f);
 		}
+
+
+		internal void Select(int aux) => SelectedIndex=aux;
 		
-		[Overlay(editorWindowType = typeof(SceneView), defaultDisplay = false, displayName = "Node Content")]
-		public class MapToolbar : Overlay, ITransientOverlay
-		{
-			public bool visible => 
-				Instance != null && 
-				ToolManager.IsActiveTool(Instance) && 
-				Initialized;
-
-			private VisualElement mainContainer;
-			private VisualElement content;
-
-			
-			private bool initialized;
-			public bool Initialized
-			{
-				get
-				{
-					if (!initialized)
-					{
-						Initialize();
-					}
-					return initialized;
-				}
-			}
-
-			private void Initialize()
-			{
-				initialized = true;
-				Instance.OnIndexChange -= OnIndexChange;
-				Instance.OnIndexChange += OnIndexChange;
-				OnIndexChange(Instance.selectedIndex);
-			}
-
-			private void Terminate()
-			{
-				initialized = false;
-				if (Instance)
-				{
-					Instance.OnIndexChange -= OnIndexChange;
-				}
-			}
-
-			public override void OnWillBeDestroyed()
-			{
-				mainContainer?.Clear();
-				if (Instance)
-				{
-					Terminate();
-				}
-				base.OnWillBeDestroyed();
-			}
-
-			private void OnIndexChange(int index)
-			{
-				content?.Clear();
-				if (Instance &&  content != null)
-				{
-					if(index != -1 )
-					{
-						var serializedObject = new SerializedObject(Instance.map);
-
-						var prop = serializedObject.FindProperty(nameof(MapBehaviour.data));
-                        
-						if(prop != null)
-						{
-							var contentProperty = prop.FindPropertyRelative(nameof(MapData.content));
-							if (contentProperty != null)
-							{
-								var property = contentProperty.GetArrayElementAtIndex(index);
-								var propElement = new PropertyField(property, index.ToString());
-								propElement.BindProperty(property);
-								content.Add(propElement);
-							}
-							else
-							{
-								Debug.Log("Content Prop not found");
-							}
-						}
-						else
-						{
-							Debug.Log("Prop not found");
-						}
-					}
-					else
-					{
-						for (int i = 0; i < Instance.map.Count; i++)
-						{
-							var aux = i;
-							var nodeData = Instance.map.GetContent(i);
-
-							var button = new ToolbarButton(() => Instance.Select(aux))
-							{
-								text = $"{i}:{(nodeData != null ? nodeData.GetType().Name : "Empty")}",
-							};
-							
-							content.Add(button);
-						}
-					}
-				}
-			}
-	
-			public override VisualElement CreatePanelContent()
-			{
-				
-				mainContainer = new VisualElement();
-				content = new ScrollView(ScrollViewMode.Vertical);
-				content.style.maxHeight = 200;
-				mainContainer.Add(content);
-				content.style.minWidth = 200;
-				if (Instance)
-				{
-					content.Add(new Label("None"));
-				}
-				else
-				{
-					content.Add(new Label("Null"));
-				}
-
-				if (Instance)
-				{
-					OnIndexChange(Instance.SelectedIndex);
-				}
-				
-				return mainContainer;
-			}
-		}
-
-		private void Select(int aux) => SelectedIndex=aux;
+		
+		
 	}
+	
+	
+	
 }

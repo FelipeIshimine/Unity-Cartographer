@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Cartographer.Utilities.Attributes;
 using UnityEngine;
 
 namespace Cartographer.Core
@@ -16,13 +17,8 @@ namespace Cartographer.Core
 		public event Action<EdgeData> OnRemoveEdge; 
 
 		[field:SerializeField] public int Count { get; private set; }
-		[field:SerializeField] public List<EdgeData> Edges;
-
-		public GraphData(int count=0)
-		{
-			Count = count;
-			Edges = new List<EdgeData>();
-		}
+		[field:SerializeField] public List<EdgeData> Edges = new();
+		[field:SerializeReference,TypeDropdown] public List<NodeData> Content = new();
 
 		public IEnumerable<EdgeData> FindInEdges(int index) => Edges.Where(x => x.To == index);
 
@@ -53,6 +49,7 @@ namespace Cartographer.Core
 		public int AddNode()
 		{
 			Count++;
+			Content.Add(null);
 			OnAddNode?.Invoke();
 			OnCountChange?.Invoke(Count);
 			return Count - 1;
@@ -74,7 +71,8 @@ namespace Cartographer.Core
 					RemoveEdge(i);
 				}
 			}
-			Debug.Log($"RemoveNode:{Count-1}");
+			//Debug.Log($"RemoveNode:{Count-1}");
+			Content.RemoveAt(Count);
 			OnRemoveNode?.Invoke();
 			OnCountChange?.Invoke(Count);
 		}
@@ -210,5 +208,12 @@ namespace Cartographer.Core
 				}
 			}
 		}
+
+		public void Merge(int selectedIndex, int targetIndex)
+		{
+			RedirectConnections(targetIndex,selectedIndex);
+			RemoveNode(targetIndex);
+		}
+
 	}
 }
