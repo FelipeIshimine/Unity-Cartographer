@@ -260,65 +260,79 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   data:
-    <Count>k__BackingField: 11
+    <Count>k__BackingField: 8
     Edges:
     - From: 1
-      To: 2
-    - From: 2
-      To: 3
-    - From: 3
-      To: 5
-    - From: 3
       To: 4
-    - From: 3
+    - From: 4
+      To: 5
+    - From: 5
       To: 6
-    - From: 6
+    - From: 1
       To: 7
     - From: 7
-      To: 8
-    - From: 8
-      To: 9
-    - From: 9
-      To: 10
-    - From: 1
-      To: 10
-    - From: 5
       To: 6
-    - From: 5
-      To: 9
     Content:
-    - rid: 8563644502660087816
-    - rid: -2
-    - rid: -2
-    - rid: -2
-    - rid: -2
-    - rid: -2
-    - rid: -2
-    - rid: -2
-    - rid: -2
-    - rid: -2
-    - rid: -2
+    - rid: 8563644502660087894
+    - rid: 8563644502660087896
+    - rid: 8563644502660087891
+    - rid: 8563644502660087892
+    - rid: 8563644502660087897
+    - rid: 8563644502660087898
+    - rid: 8563644502660087899
+    - rid: 8563644502660087900
   positions:
-  - {x: -6.9881163, y: 0, z: 6.244169}
-  - {x: -5.0349507, y: 0, z: 1.6685436}
-  - {x: -2.7288322, y: 0, z: -1.3009231}
-  - {x: -3.2311616, y: -0.0000009536743, z: -4.6817093}
-  - {x: -3.8584778, y: 2.5270247, z: -14.256125}
-  - {x: 2.510316, y: 0, z: -7.1219673}
-  - {x: 3.1520853, y: 0, z: -13.897158}
-  - {x: 4.3957767, y: -0.0000009536743, z: -4.9728174}
-  - {x: 5.203888, y: 0, z: 3.512909}
-  - {x: -1.2531819, y: 0, z: 7.4786816}
-  - {x: -4.3564305, y: 0, z: 5.044606}
+  - {x: -4.058113, y: 0, z: -9.596382}
+  - {x: -12.129788, y: 0, z: 2.631424}
+  - {x: -5.7503357, y: 0, z: 12.758421}
+  - {x: 0.21254349, y: 0, z: 11.545778}
+  - {x: -10.195684, y: 0, z: 8.059727}
+  - {x: -5.753973, y: -0.0000009536743, z: 8.404809}
+  - {x: -3.7259064, y: 0, z: 0.5918937}
+  - {x: -9.250629, y: 0, z: -1.4545196}
+  - {x: -8.995237, y: 0, z: 1.8409653}
+  - {x: -7.320854, y: -0.0000009536743, z: -4.537745}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
-    - rid: 8563644502660087816
-      type: {class: LandmarkNodeData, ns: , asm: Assembly-CSharp}
-      data:
-        Name: 
+    - rid: 8563644502660087891
+      type: {class: EmptyNodeData, ns: Cartographer.Core, asm: Cartographer.Core}
+      data: 
+    - rid: 8563644502660087892
+      type: {class: EmptyNodeData, ns: Cartographer.Core, asm: Cartographer.Core}
+      data: 
+    - rid: 8563644502660087894
+      type: {class: CampfireNodeData, ns: Sample.Campfire, asm: RoguelikeMap}
+      data: 
+    - rid: 8563644502660087896
+      type: {class: CityNodeData, ns: , asm: Assembly-CSharp}
+      data: 
+    - rid: 8563644502660087897
+      type: {class: EmptyNodeData, ns: Cartographer.Core, asm: Cartographer.Core}
+      data: 
+    - rid: 8563644502660087898
+      type: {class: EmptyNodeData, ns: Cartographer.Core, asm: Cartographer.Core}
+      data: 
+    - rid: 8563644502660087899
+      type: {class: EmptyNodeData, ns: Cartographer.Core, asm: Cartographer.Core}
+      data: 
+    - rid: 8563644502660087900
+      type: {class: EmptyNodeData, ns: Cartographer.Core, asm: Cartographer.Core}
+      data: 
 --- !u!114 &2091771420
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -206,7 +206,6 @@ namespace Cartographer.Core.Editor
 						return;
 					}
 
-					
 					if (TryHandleNodeSelection(graphBehaviour,sceneView,mousePosition))
 					{
 						return;
@@ -726,7 +725,14 @@ namespace Cartographer.Core.Editor
 
 				if (map.TryGetContent(i, out NodeData data))
 				{
-					Handles.Label(pos, $"{data}", textStyle);
+					if (selectedIndex == i)
+					{
+						Handles.Label(pos + Vector3.up, $"[{i}] {data}", textStyle);
+					}
+					else
+					{
+						Handles.Label(pos, $"[{i}] {data}", textStyle);
+					}
 				}
 				else
 				{

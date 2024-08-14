@@ -10,9 +10,9 @@ namespace Cartographer.RoguelikeMap.Core.Sources
 	{
 		[field: SerializeField] public Optional<int> RandomSeed = new Optional<int>(0);
 		
-		[field: SerializeField, IncreaseButton] public int EnterNodes;
-		[field: SerializeField, IncreaseButton] public int Floors { get; private set; } = 1;
-		[field: SerializeField, IncreaseButton] public int ExitNodes;
+		[field: SerializeField, IncreaseButton] public int EnterNodes = 3;
+		[field: SerializeField, IncreaseButton] public int Floors { get; private set; } = 5;
+		[field: SerializeField, IncreaseButton] public int ExitNodes = 1;
 		[field: SerializeField, IncreaseButton] public int MaxFloorSize = 5;
 
 		[field: SerializeField, Range(0,1f)] public float NodesDensity = .5f;

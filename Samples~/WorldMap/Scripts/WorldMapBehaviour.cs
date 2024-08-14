@@ -1,4 +1,5 @@
-﻿using Cartographer.Core;
+﻿using System;
+using Cartographer.Core;
 using UnityEngine;
 
 namespace Cartographer.WorldMap
@@ -11,6 +12,15 @@ namespace Cartographer.WorldMap
 		private void Reset()
 		{
 			graphBehaviour = GetComponent<GraphBehaviour>();
+		}
+
+
+		private void Awake()
+		{
+			foreach (NodeData nodeData in graphBehaviour.data.Content)
+			{
+				
+			}
 		}
 	}
 }

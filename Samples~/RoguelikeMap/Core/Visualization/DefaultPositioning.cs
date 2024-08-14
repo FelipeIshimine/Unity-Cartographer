@@ -5,7 +5,7 @@ namespace Cartographer.RoguelikeMap.Core
 	[System.Serializable]
 	public class DefaultPositioning : NodesPositioning
 	{
-		[SerializeField] private Vector2 separation = new Vector2(1, 1);
+		[SerializeField] private Vector2 separation = new Vector2(1, 2);
 
 		public override void Process(RoguelikeMapBehaviour behaviour)
 		{

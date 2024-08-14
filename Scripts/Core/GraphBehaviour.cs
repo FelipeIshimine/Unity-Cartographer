@@ -8,7 +8,7 @@ namespace Cartographer.Core
 	{
 		public event Action<GraphBehaviour> OnLoad;
 		
-		[SerializeField] internal GraphData data;
+		[SerializeField] public GraphData data;
 		[SerializeField] private List<Vector3> positions = new List<Vector3>();
 
 		public int Count => data.Count;

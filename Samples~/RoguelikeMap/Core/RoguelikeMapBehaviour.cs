@@ -8,7 +8,7 @@ namespace Cartographer.RoguelikeMap.Core
 	[RequireComponent(typeof(GraphBehaviour))]
 	public class RoguelikeMapBehaviour : MonoBehaviour, ISerializationCallbackReceiver
 	{
-		[field: SerializeReference, TypeDropdown] public IRoguelikeMapSource Source { get; set; } = new AdvancedRoguelikeMap();
+		[field: SerializeReference, TypeDropdown] public IRoguelikeMapSource Source { get; set; } = new SimpleRoguelikeMap();
 		
 		[SerializeField] private GraphBehaviour graphBehaviour;
 		public GraphBehaviour GraphBehaviour => graphBehaviour;
