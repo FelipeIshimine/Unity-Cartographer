@@ -23,7 +23,7 @@ namespace Cartographer.RoguelikeMap.Core.Processors
 			var floor = new List<int>();
 			for (int i = 0; i < count; i++)
 			{
-				floor.Add(data.CreateNode());
+				floor.Add(data.graph.AddNode());
 			}
 			data.InsertFloorAt(0,floor);	
 		}

@@ -40,7 +40,7 @@ namespace Cartographer.RoguelikeMap.Core
 					//Debug.Log($"{i}/{j}:{floor[j]}");
 					var t = ((float)j / floor.Count) * mult;
 					var pos = new Vector3(Mathf.Sin(t), 0,Mathf.Cos(t))*offset;
-					behaviour.MapBehaviour.SetLocalPosition(floor[j], pos);
+					behaviour.GraphBehaviour.SetLocalPosition(floor[j], pos);
 				}
 			}
 		}

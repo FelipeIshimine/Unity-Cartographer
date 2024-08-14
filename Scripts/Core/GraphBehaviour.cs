@@ -36,18 +36,18 @@ namespace Cartographer.Core
 			OnLoad?.Invoke(this);
 		}
 
-		private void Unregister(GraphData data)
+		private void Unregister(GraphData graphData)
 		{
-			data.OnAddNode -= OnNodeAdded;
-			data.OnRemoveNode -= OnNodeRemoved;
-			data.OnSwapNodes -= OnNodeSwapped;
+			graphData.OnAddNode -= OnNodeAdded;
+			graphData.OnRemoveNode -= OnNodeRemoved;
+			graphData.OnSwapNodes -= OnNodeSwapped;
 		}
 
-		private void Register(GraphData data)
+		private void Register(GraphData graphDat)
 		{
-			data.OnAddNode += OnNodeAdded;
-			data.OnRemoveNode += OnNodeRemoved;
-			data.OnSwapNodes += OnNodeSwapped;
+			graphDat.OnAddNode += OnNodeAdded;
+			graphDat.OnRemoveNode += OnNodeRemoved;
+			graphDat.OnSwapNodes += OnNodeSwapped;
 		}
 
 		private void OnNodeSwapped(int from, int to)

@@ -61,7 +61,7 @@ namespace Cartographer.RoguelikeMap.Core.Processors
 						
 					if(!data.ExistsConnection(parentID, floor[slotIndex]))
 					{
-						data.Connect(parentID, floor[slotIndex]);
+						data.graph.Connect(parentID, floor[slotIndex]);
 					}
                         
 				}

@@ -2,14 +2,14 @@ using UnityEngine;
 
 namespace Cartographer.Core
 {
-	[RequireComponent(typeof(MapBehaviour))]
+	[RequireComponent(typeof(GraphBehaviour))]
 	public abstract class GraphContentBehaviour<T> : MonoBehaviour
 	{
-		private MapBehaviour mapBehaviour;
+		private GraphBehaviour graphBehaviour;
 		public GraphContentData<T> ContentData;
 		private void Awake()
 		{
-			mapBehaviour = GetComponent<MapBehaviour>();
+			graphBehaviour = GetComponent<GraphBehaviour>();
 		}
 	}
 }

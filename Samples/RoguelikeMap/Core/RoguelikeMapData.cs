@@ -8,14 +8,15 @@ using UnityEngine.Assertions;
 namespace Cartographer.RoguelikeMap.Core
 {
 	[System.Serializable]
-	public class RoguelikeMapData : MapData
+	public class RoguelikeMapData
 	{
+		[SerializeField] internal GraphData graph;
 		public int FloorCount => floors.Count; 
-		
 		private List<List<int>> floors = new();
 
 		public RoguelikeMapData()
 		{
+			graph = new GraphData();
 			graph.OnSwapNodes += (x, y) =>
 			{
 				if (TryFindCoordinates(x, out var xCoord) && TryFindCoordinates(y, out var yCoord))
@@ -391,17 +392,17 @@ namespace Cartographer.RoguelikeMap.Core
 
 		public IEnumerable<int> FindAllEmptyLocations()
 		{
-			for (int i = 0; i < content.Count; i++)
+			for (int i = 0; i < graph.Content.Count; i++)
 			{
-				if (content[i] == null)
+				if (graph.Content[i] == null)
 				{
 					yield return i;
 				}
 			}
 		}
 
-		public void SetContent(int node, NodeData newData) => content[node] = newData;
-		public NodeData GetContent(int node) => content[node];
+		public void SetContent(int node, NodeData newData) => graph.Content[node] = newData;
+		public NodeData GetContent(int node) => graph.Content[node];
 
 		public Vector2 GetDegreesRange(int floorIndex, int slotIndex)
 		{
@@ -441,18 +442,18 @@ namespace Cartographer.RoguelikeMap.Core
 			return false;
 		}
 
-		public override void RemoveNode(int index)
+		public void RemoveNode(int index)
 		{
 			if(TryFindCoordinates(index, out Vector2Int coordinates))
 			{
 				Debug.Log($"RoguelikeMap.RemoveNode:{index} at {coordinates}");
 				var floor = floors[coordinates.x];
-				base.RemoveNode(index);
+				graph.RemoveNode(index);
 				floor.RemoveAt(coordinates.y);
 			}
 			else
 			{
-				base.RemoveNode(index);
+				graph.RemoveNode(index);
 				Debug.Log($"RoguelikeMap.RemoveNode:{index} Fail");
 			}
 		}
@@ -490,7 +491,7 @@ namespace Cartographer.RoguelikeMap.Core
 
 		public IEnumerable<IReadOnlyList<int>> GetAllFloors() => floors;
 
-		public void CreateNodeAtFloor(int floorIndex) => AddToFloor(floorIndex, CreateNode());
+		public void CreateNodeAtFloor(int floorIndex) => AddToFloor(floorIndex, graph.AddNode());
 
 		private void AddToFloor(int floorIndex, int node)
 		{

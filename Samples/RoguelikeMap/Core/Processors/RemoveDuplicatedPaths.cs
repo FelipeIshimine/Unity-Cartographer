@@ -5,7 +5,7 @@
 	{
 		public void Process(ref RoguelikeMapData data)
 		{
-			data.RemoveDuplicatedEdges();
+			data.graph.RemoveDuplicatedEdges();
 		}
 	}
 }

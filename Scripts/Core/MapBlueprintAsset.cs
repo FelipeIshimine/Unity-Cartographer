@@ -4,10 +4,10 @@ using UnityEngine;
 namespace Cartographer.Core
 {
 	[CreateAssetMenu( menuName = "Roguelike Map/Map Blueprint")]
-	public class MapBlueprintAsset : ScriptableObject, IMapBlueprint
+	public class GraphBlueprintAsset : ScriptableObject, IGraphBlueprint
 	{
 		[SerializeReference,TypeDropdown] 
-		public MapBlueprint Blueprint;
-		public MapData Build() => Blueprint.Build();
+		public GraphBlueprint Blueprint;
+		public GraphData Build() => Blueprint.Build();
 	}
 }

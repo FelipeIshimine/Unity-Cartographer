@@ -18,7 +18,7 @@ namespace Cartographer.RoguelikeMap.Core
 
 			for (int i = 0; i < behaviour.FloorCount; i++)
 			{
-				floors.Add(new List<int[]>(CalculateGroups(behaviour.MapBehaviour, behaviour.Data.GetFloor(i))));
+				floors.Add(new List<int[]>(CalculateGroups(behaviour.GraphBehaviour, behaviour.Data.GetFloor(i))));
 			}
 
 			for (var floorIndex = 0; floorIndex < floors.Count; floorIndex++)
@@ -44,7 +44,7 @@ namespace Cartographer.RoguelikeMap.Core
 					for (int nodeIndex = 0; nodeIndex < group.Length; nodeIndex++)
 					{
 						int node = group[nodeIndex];
-						behaviour.MapBehaviour.SetLocalPosition(
+						behaviour.GraphBehaviour.SetLocalPosition(
 							node,
 							new Vector3(
 								position,
@@ -58,7 +58,7 @@ namespace Cartographer.RoguelikeMap.Core
 			}
 		}
 
-		private IEnumerable<int[]> CalculateGroups(MapBehaviour mapBehaviour, IReadOnlyList<int> floor)
+		private IEnumerable<int[]> CalculateGroups(GraphBehaviour graph, IReadOnlyList<int> floor)
 		{
 			List<int> groupContainer = new List<int>(floor.Count);
 			HashSet<int> parentAndChildren = new HashSet<int>();
@@ -68,13 +68,13 @@ namespace Cartographer.RoguelikeMap.Core
 				if (parentAndChildren.Count == 0)
 				{
 					//Parents
-					foreach (var edge in mapBehaviour.FindAllEdgeIn(node))
+					foreach (var edge in graph.FindAllEdgeIn(node))
 					{
 						parentAndChildren.Add(edge.From);
 					}
 					
 					//Children
-					foreach (var edge in mapBehaviour.FindAllEdgeOut(node))
+					foreach (var edge in graph.FindAllEdgeOut(node))
 					{
 						parentAndChildren.Add(edge.To);
 					}
@@ -83,7 +83,7 @@ namespace Cartographer.RoguelikeMap.Core
 				else
 				{
 					bool breakGroup = false;
-					foreach (var edge in mapBehaviour.FindAllEdgeIn(node))
+					foreach (var edge in graph.FindAllEdgeIn(node))
 					{
 						if (!parentAndChildren.Contains(edge.From))
 						{
@@ -94,7 +94,7 @@ namespace Cartographer.RoguelikeMap.Core
 					
 					if(!breakGroup)
 					{
-						foreach (var edge in mapBehaviour.FindAllEdgeOut(node))
+						foreach (var edge in graph.FindAllEdgeOut(node))
 						{
 							if (!parentAndChildren.Contains(edge.To))
 							{

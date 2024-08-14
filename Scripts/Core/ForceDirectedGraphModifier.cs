@@ -2,10 +2,10 @@ using UnityEngine;
 
 namespace Cartographer.Core
 {
-	[RequireComponent(typeof(MapBehaviour))]
+	[RequireComponent(typeof(GraphBehaviour))]
 	public class ForceDirectedGraphModifier : MonoBehaviour
 	{
-		[SerializeField] private MapBehaviour mapBehaviour;
+		[SerializeField] private GraphBehaviour graphBehaviour;
 	
 		public Vector2 minMaxInfluenceDistance = new Vector2(1,100);
 	
@@ -16,31 +16,31 @@ namespace Cartographer.Core
 		
 		private void Reset()
 		{
-			mapBehaviour = GetComponent<MapBehaviour>();
+			graphBehaviour = GetComponent<GraphBehaviour>();
 		}
 
 		void FixedUpdate()
 		{
-			for (int x = 0; x < mapBehaviour.Count; x++)
+			for (int x = 0; x < graphBehaviour.Count; x++)
 			{
-				for (int y = x+1; y < mapBehaviour.Count; y++)
+				for (int y = x+1; y < graphBehaviour.Count; y++)
 				{
 					ApplyForceWithSquareDecay(y, x,repulsiveForce);
 				}
 			}
 
-			for (int i = 0; i < mapBehaviour.EdgesCount; i++)
+			for (int i = 0; i < graphBehaviour.EdgesCount; i++)
 			{
-				var edge = mapBehaviour.GetEdge(i);
+				var edge = graphBehaviour.GetEdge(i);
 				ApplyForce(edge.From,edge.To,-magneticForce);
 			}
 
-			for (int i = 0; i < mapBehaviour.Count; i++)
+			for (int i = 0; i < graphBehaviour.Count; i++)
 			{
-				var xPos = mapBehaviour.GetLocalPosition(i);
+				var xPos = graphBehaviour.GetLocalPosition(i);
 				var dir = xPos.normalized;
 				xPos -= dir * (Time.deltaTime * centerForce);
-				mapBehaviour.SetLocalPosition(i,xPos);
+				graphBehaviour.SetLocalPosition(i,xPos);
 			}
 	    
 		}
@@ -48,8 +48,8 @@ namespace Cartographer.Core
     
 		private void ApplyForceWithSquareDecay(int y, int x, float force)
 		{
-			var yPos = mapBehaviour.GetLocalPosition(y);
-			var xPos = mapBehaviour.GetLocalPosition(x);
+			var yPos = graphBehaviour.GetLocalPosition(y);
+			var xPos = graphBehaviour.GetLocalPosition(x);
 
 			var diff = (yPos - xPos);
 
@@ -70,14 +70,14 @@ namespace Cartographer.Core
 			xPos -= dir * displacement;
 			yPos += dir * displacement;
 
-			mapBehaviour.SetLocalPosition(x,xPos);
-			mapBehaviour.SetLocalPosition(y,yPos);
+			graphBehaviour.SetLocalPosition(x,xPos);
+			graphBehaviour.SetLocalPosition(y,yPos);
 		}
 	
 		private void ApplyForce(int y, int x, float force)
 		{
-			var yPos = mapBehaviour.GetLocalPosition(y);
-			var xPos = mapBehaviour.GetLocalPosition(x);
+			var yPos = graphBehaviour.GetLocalPosition(y);
+			var xPos = graphBehaviour.GetLocalPosition(x);
 
 			var diff = (yPos - xPos);
 			if (diff == Vector3.zero)
@@ -97,8 +97,8 @@ namespace Cartographer.Core
 			xPos -= dir * displacement;
 			yPos += dir * displacement;
 
-			mapBehaviour.SetLocalPosition(x,xPos);
-			mapBehaviour.SetLocalPosition(y,yPos);
+			graphBehaviour.SetLocalPosition(x,xPos);
+			graphBehaviour.SetLocalPosition(y,yPos);
 		}
 	}
 }

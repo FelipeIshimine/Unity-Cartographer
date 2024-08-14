@@ -15,11 +15,11 @@ namespace Cartographer.RoguelikeMap.Core.Processors
 				{
 					if(Random.Range(0,2)==0)
 					{
-						data.Merge(floor[0], floor[^1]);
+						data.graph.Merge(floor[0], floor[^1]);
 					}
 					else
 					{
-						data.Merge(floor[^1], floor[0]);
+						data.graph.Merge(floor[^1], floor[0]);
 					}
 				}
 			}

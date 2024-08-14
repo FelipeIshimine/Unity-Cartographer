@@ -19,7 +19,7 @@ namespace Cartographer.RoguelikeMap.Core
 				{
 					int index = floor[j];
 
-					behaviour.MapBehaviour.SetLocalPosition(
+					behaviour.GraphBehaviour.SetLocalPosition(
 						index,
 						startPos +
 						new Vector3(separation.x * j, 0, separation.y * i));

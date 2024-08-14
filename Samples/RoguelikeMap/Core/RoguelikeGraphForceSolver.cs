@@ -20,14 +20,14 @@ namespace Cartographer.RoguelikeMap.Core
 
 		public void Step(float deltaTime)
 		{
-			RefreshLength(roguelikeMap.MapBehaviour);
+			RefreshLength(roguelikeMap.GraphBehaviour);
 
 			ResetTargetVelocity();
 
-			for (int i = 0; i < roguelikeMap.MapBehaviour.EdgesCount; i++)
+			for (int i = 0; i < roguelikeMap.GraphBehaviour.EdgesCount; i++)
 			{
-				var edge = roguelikeMap.MapBehaviour.GetEdge(i);
-				ApplyForce(edge.From,edge.To,-graphSolverSettings.magneticForce, deltaTime,roguelikeMap.MapBehaviour);
+				var edge = roguelikeMap.GraphBehaviour.GetEdge(i);
+				ApplyForce(edge.From,edge.To,-graphSolverSettings.magneticForce, deltaTime,roguelikeMap.GraphBehaviour);
 			}
 			
 			for (int i = 0; i < roguelikeMap.FloorCount; i++)
@@ -37,11 +37,11 @@ namespace Cartographer.RoguelikeMap.Core
 				{
 					for (int y = x+1; y < floor.Count; y++)
 					{
-						ApplyForceWithSquareDecay(floor[x],floor[y], graphSolverSettings.repulsiveForce, deltaTime,roguelikeMap.MapBehaviour);
+						ApplyForceWithSquareDecay(floor[x],floor[y], graphSolverSettings.repulsiveForce, deltaTime,roguelikeMap.GraphBehaviour);
 					}	
 				}
 			}
-			ApplyVelocity(deltaTime, roguelikeMap.MapBehaviour);
+			ApplyVelocity(deltaTime, roguelikeMap.GraphBehaviour);
 		}
 
 		private void ResetTargetVelocity()
@@ -52,28 +52,28 @@ namespace Cartographer.RoguelikeMap.Core
 			}
 		}
 
-		private void ApplyVelocity(float deltaTime, MapBehaviour mapBehaviour)
+		private void ApplyVelocity(float deltaTime, GraphBehaviour graphBehaviour)
 		{
 			for (int i = 0; i < targetVelocity.Length; i++)
 			{
 				velocity[i] = Vector3.MoveTowards(velocity[i], targetVelocity[i], deltaTime * graphSolverSettings.acceleration);
-				mapBehaviour.SetLocalPosition(i,mapBehaviour.GetLocalPosition(i) + velocity[i]);
+				graphBehaviour.SetLocalPosition(i,graphBehaviour.GetLocalPosition(i) + velocity[i]);
 			}
 		}
 
-		private void RefreshLength(MapBehaviour mapBehaviour)
+		private void RefreshLength(GraphBehaviour graphBehaviour)
 		{
-			if (targetVelocity.Length != mapBehaviour.Count)
+			if (targetVelocity.Length != graphBehaviour.Count)
 			{
-				Array.Resize(ref targetVelocity, mapBehaviour.Count);
-				Array.Resize(ref velocity, mapBehaviour.Count);
+				Array.Resize(ref targetVelocity, graphBehaviour.Count);
+				Array.Resize(ref velocity, graphBehaviour.Count);
 			}
 		}
 
-		private void ApplyForceWithSquareDecay(int y, int x, float force, float deltaTime, MapBehaviour mapBehaviour)
+		private void ApplyForceWithSquareDecay(int y, int x, float force, float deltaTime, GraphBehaviour graphBehaviour)
 		{
-			var yPos = mapBehaviour.GetLocalPosition(y);
-			var xPos = mapBehaviour.GetLocalPosition(x);
+			var yPos = graphBehaviour.GetLocalPosition(y);
+			var xPos = graphBehaviour.GetLocalPosition(x);
 			
 			var diff = (yPos - xPos);
 			if (diff.magnitude < graphSolverSettings.minMaxInfluenceDistance.x ||
@@ -95,10 +95,10 @@ namespace Cartographer.RoguelikeMap.Core
 			
 		}
 
-		private void ApplyForce(int y, int x, float force, float deltaTime, MapBehaviour mapBehaviour)
+		private void ApplyForce(int y, int x, float force, float deltaTime, GraphBehaviour graphBehaviour)
 		{
-			var yPos = mapBehaviour.GetLocalPosition(y);
-			var xPos = mapBehaviour.GetLocalPosition(x);
+			var yPos = graphBehaviour.GetLocalPosition(y);
+			var xPos = graphBehaviour.GetLocalPosition(x);
 
 			
 			var diff = (yPos - xPos);
