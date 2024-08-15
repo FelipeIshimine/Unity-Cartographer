@@ -5,8 +5,14 @@ using UnityEngine;
 
 namespace Cartographer.Core.Editor
 {
+	[InitializeOnLoad]
 	public class CartographerAssetPostprocessor : AssetPostprocessor
 	{
+		static CartographerAssetPostprocessor()
+		{
+			Init();
+		}
+		
 		public static void Init()
 		{
 			var cartographerData = CartographerUtilities.LoadOrCreateData();

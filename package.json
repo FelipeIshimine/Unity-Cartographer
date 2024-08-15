@@ -20,7 +20,12 @@
         {
             "displayName": "Roguelike Maps",
             "description": "Example for a complex procedural Roguelike Maps",
-            "path": "Samples/RoguelikeMap"
+            "path": "Samples~/RoguelikeMap"
+        },
+        {
+            "displayName": "World Map",
+            "description": "Example for a World Map",
+            "path": "Samples~/WorldMap"
         }
     ]
 }
