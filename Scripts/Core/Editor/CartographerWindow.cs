@@ -39,6 +39,7 @@ namespace Cartographer.Core.Editor
 			
 			scrollView.Add(content);
 
+			/*
 			foreach (NodeType nodeType in data.nodeTypes)
 			{
 				VisualElement nodeTypeContainer = new VisualElement();
@@ -60,6 +61,7 @@ namespace Cartographer.Core.Editor
 				
 				content.Add(nodeTypeContainer);
 			}
+			*/
 			
 			rootVisualElement.Add(scrollView);
 			

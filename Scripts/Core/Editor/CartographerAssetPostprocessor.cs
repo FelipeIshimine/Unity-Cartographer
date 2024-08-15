@@ -16,36 +16,8 @@ namespace Cartographer.Core.Editor
 		public static void Init()
 		{
 			var cartographerData = CartographerUtilities.LoadOrCreateData();
-			if (cartographerData.AddNodeTypes(FindOrCreateNodeTypes()))
-			{
-				EditorUtility.SetDirty(cartographerData);
-				AssetDatabase.SaveAssetIfDirty(cartographerData);
-			}
 			CartographerWindow.RequestRefresh();
 		}
-
-		public static IEnumerable<NodeType> FindOrCreateNodeTypes()
-		{
-			foreach (var type in TypeCache.GetTypesDerivedFrom<NodeType>())
-			{
-				if(type.IsAbstract) continue;
-				
-				var guids = AssetDatabase.FindAssets($"t:{type.Name}");
-				NodeType asset;
-				if (guids.Length == 0)
-				{
-					asset = (NodeType)ScriptableObject.CreateInstance(type);
-					AssetDatabase.CreateAsset(asset, $"Assets/ScriptableObjects/Cartographer/{type.Name}.asset");
-				}
-				else
-				{
-					asset = AssetDatabase.LoadAssetAtPath<NodeType>($"Assets/ScriptableObjects/Cartographer/{type.Name}.asset");
-				}
-
-				yield return asset;
-			}
-		}
-
 
 		private static void OnPostprocessAllAssets(string[] importedAssets,
 		                                           string[] deletedAssets,

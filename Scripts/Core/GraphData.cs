@@ -49,7 +49,7 @@ namespace Cartographer.Core
 		public int AddNode()
 		{
 			Count++;
-			Content.Add(new EmptyNodeType.Data());
+			Content.Add(new EmptyNodeData());
 			OnAddNode?.Invoke();
 			OnCountChange?.Invoke(Count);
 			return Count - 1;
