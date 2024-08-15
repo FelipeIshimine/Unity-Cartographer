@@ -23,6 +23,7 @@ namespace Cartographer.Core.Editor
 
 		public static IEnumerable<NodeType> FindOrCreateNodeTypes()
 		{
+			bool assetCreated = false;
 			foreach (var type in TypeCache.GetTypesDerivedFrom<NodeType>())
 			{
 				if(type.IsAbstract) continue;
@@ -32,6 +33,7 @@ namespace Cartographer.Core.Editor
 				if (guids.Length == 0)
 				{
 					asset = (NodeType)ScriptableObject.CreateInstance(type);
+					assetCreated = true;
 					AssetDatabase.CreateAsset(asset, $"Assets/ScriptableObjects/Cartographer/{type.Name}.asset");
 				}
 				else
@@ -40,6 +42,11 @@ namespace Cartographer.Core.Editor
 				}
 
 				yield return asset;
+			}
+
+			if (assetCreated)
+			{
+				AssetDatabase.SaveAssets();
 			}
 		}
 

@@ -20,8 +20,7 @@ namespace Cartographer.Core.Editor
 				AssetDatabase.CreateFolder("Assets/ScriptableObjects", "Cartographer");
 			}
 
-			CartographerData cartographerData =
-				AssetDatabase.LoadAssetAtPath<CartographerData>($"{FolderPath}/{FileName}");
+			CartographerData cartographerData = AssetDatabase.LoadAssetAtPath<CartographerData>($"{FolderPath}/{FileName}");
 			if (!cartographerData)
 			{
 				cartographerData = ScriptableObject.CreateInstance<CartographerData>();
