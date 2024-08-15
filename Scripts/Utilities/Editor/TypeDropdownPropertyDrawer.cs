@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Cartographer.Utilities.Attributes;
 using Cartographer.Utilities.Editor;
 using UnityEditor;
 using UnityEditor.Toolbars;
 using UnityEditor.UIElements;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Core.Attributes.Editor
@@ -50,8 +52,7 @@ namespace Core.Attributes.Editor
 			
 			if(dropdownAttribute.UseAbsolutePosition)
 			{
-				typeBtn = new EditorToolbarDropdown(GetButtonLabel(property),
-					() => TypeDropdownClicked(typeBtn, property))
+				typeBtn = new EditorToolbarDropdown(GetButtonLabel(property), () => TypeDropdownClicked(typeBtn, property))
 				{
 					style =
 					{
@@ -85,12 +86,6 @@ namespace Core.Attributes.Editor
 			{
 				var type = managedReferenceValue.GetType();
 				var value = GetDisplayName(type);
-				var baseType = type.BaseType;
-				if (baseType != null)
-				{
-					value = value.Replace(baseType.Name, string.Empty);
-				}
-
 				return value;
 			}
 
@@ -107,25 +102,35 @@ namespace Core.Attributes.Editor
 			var typeFullName = type.FullName;
 			var typeNamespace = type.Namespace;
 
-			if (string.IsNullOrEmpty(typeFullName) || string.IsNullOrEmpty(typeNamespace))
-			{
-				return type.Name;
-			}
+			/*
+			Debug.Log(typeFullName);
+			Debug.Log(typeNamespace);*/
 
-			return typeFullName.Replace(typeNamespace, string.Empty).Replace(".", string.Empty);
+			string resultName;
+			if (type.GetCustomAttribute(typeof(TypeDropdownNameAttribute), false) is TypeDropdownNameAttribute nameAttribute)
+			{
+				resultName = nameAttribute.Name;
+			}
+			else if (!string.IsNullOrEmpty(typeFullName) && !string.IsNullOrEmpty(typeNamespace))
+			{
+				resultName = typeFullName.Replace(typeNamespace, string.Empty).Replace(".", string.Empty);
+			}
+			else if(!string.IsNullOrEmpty(typeFullName))
+			{
+				resultName = type.FullName;
+			}
+			else
+			{
+				resultName = type.Name;
+			}
+			return resultName;
+
 		}
 
 		private void TypeDropdownClicked(EditorToolbarDropdown typeBtn, SerializedProperty property)
 		{
-			Type targetType;
-			if (fieldInfo.FieldType.IsConstructedGenericType)
-			{
-				targetType = fieldInfo.FieldType.GetGenericArguments()[0];
-			}
-			else
-			{
-				targetType = fieldInfo.FieldType;
-			}
+			var targetType = GetTargetType();
+			var baseTypeName = GetDisplayName(targetType);
 
 			var types = new List<Type>();
 
@@ -139,7 +144,6 @@ namespace Core.Attributes.Editor
 				}
 			}
 
-			var baseTypeName = GetDisplayName(targetType);
 			var typesArray = types.ToArray();
 
 			string[] labels = new string [typesArray.Length];
@@ -160,7 +164,7 @@ namespace Core.Attributes.Editor
 
 				if (string.IsNullOrEmpty(path))
 				{
-					labels[i] = GetDisplayName(type).Replace(baseTypeName, string.Empty);
+					labels[i] = GetDisplayName(type);
 				}
 				else
 				{
@@ -170,11 +174,28 @@ namespace Core.Attributes.Editor
 
 			QuickAdvancedDropdown dropdown =
 				new QuickAdvancedDropdown(
-					"Types",
+					$"{baseTypeName} Types",
 					labels,
 					index => OnTypeSelected(index, typeBtn, property, typesArray));
 
-			dropdown.Show(typeBtn.worldBound);
+			var rect = typeBtn.worldBound;
+			rect.width = Mathf.Max(200, rect.width);
+			dropdown.Show(rect);
+		}
+
+		private Type GetTargetType()
+		{
+			Type targetType;
+			if (fieldInfo.FieldType.IsConstructedGenericType)
+			{
+				targetType = fieldInfo.FieldType.GetGenericArguments()[0];
+			}
+			else
+			{
+				targetType = fieldInfo.FieldType;
+			}
+
+			return targetType;
 		}
 
 		void OnTypeSelected(int index, EditorToolbarDropdown typeBtn, SerializedProperty property, Type[] typesArray)
