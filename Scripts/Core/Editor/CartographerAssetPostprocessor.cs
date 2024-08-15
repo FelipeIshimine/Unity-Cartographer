@@ -16,9 +16,12 @@ namespace Cartographer.Core.Editor
 		public static void Init()
 		{
 			var cartographerData = CartographerUtilities.LoadOrCreateData();
-			cartographerData.SetNodeTypes(FindOrCreateNodeTypes());
+			if (cartographerData.AddNodeTypes(FindOrCreateNodeTypes()))
+			{
+				EditorUtility.SetDirty(cartographerData);
+				AssetDatabase.SaveAssetIfDirty(cartographerData);
+			}
 			CartographerWindow.RequestRefresh();
-			AssetDatabase.SaveAssetIfDirty(cartographerData);
 		}
 
 		public static IEnumerable<NodeType> FindOrCreateNodeTypes()

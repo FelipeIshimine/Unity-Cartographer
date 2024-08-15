@@ -1,14 +1,24 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Cartographer.Utilities.Attributes
 {
 	public class TypeDropdownAttribute : PropertyAttribute
 	{
-		public readonly bool UseAbsolutePosition = true;
-
+		public readonly bool UseAbsolutePosition;
 		public TypeDropdownAttribute(bool useAbsolutePosition = true)
 		{
-			this.UseAbsolutePosition = useAbsolutePosition;
+			UseAbsolutePosition = useAbsolutePosition;
+		}
+	}
+
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
+	public class TypeDropdownNameAttribute : Attribute
+	{
+		public readonly string Name;
+		public TypeDropdownNameAttribute(string name)
+		{
+			Name = name;
 		}
 	}
 }
