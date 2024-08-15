@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,12 +8,13 @@ namespace Cartographer.Core
 	public class GraphBehaviour : MonoBehaviour, ISerializationCallbackReceiver
 	{
 		public event Action<GraphBehaviour> OnLoad;
-		
+		[SerializeField] public bool showGizmos;
 		[SerializeField] public GraphData data;
 		[SerializeField] private List<Vector3> positions = new List<Vector3>();
 
-		public int Count => data.Count;
+		public int Count => data != null?data.Count:0;
 		public int EdgesCount => data.Edges.Count;
+		public IEnumerable<EdgeData> Edges => data.Edges;
 
 		public void Load(GraphData newData)
 		{

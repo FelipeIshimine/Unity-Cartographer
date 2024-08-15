@@ -620,17 +620,32 @@ namespace Cartographer.Core.Editor
 			List<Vector3> selectionLines = new List<Vector3>(connectionsOut.Count * 2);
 			foreach (EdgeData edgeData in connectionsOut)
 			{
-				selectionLines.Add(graph.GetWorldPosition(edgeData.From));
-				selectionLines.Add(graph.GetWorldPosition(edgeData.To));
+				var from = graph.GetWorldPosition(edgeData.From);
+				var to = graph.GetWorldPosition(edgeData.To);
+				var dir = (to - from).normalized;
+				dir = Vector3.Cross(dir, graph.transform.up);
+				selectionLines.Add(from + dir*.025f);
+				selectionLines.Add(to + dir*.025f);
+				
+				/*selectionLines.Add(graph.GetWorldPosition(edgeData.From));
+				selectionLines.Add(graph.GetWorldPosition(edgeData.To));*/
 			}
 			Handles.DrawLines(selectionLines.ToArray());
 			
-			Handles.color = new Color(1f,.5f,.2f);
+			Handles.color = new Color(1f,.6f,.4f);
 			selectionLines = new List<Vector3>(connectionsIn.Count * 2);
 			foreach (EdgeData edgeData in connectionsIn)
 			{
-				selectionLines.Add(graph.GetWorldPosition(edgeData.From));
-				selectionLines.Add(graph.GetWorldPosition(edgeData.To));
+				var from = graph.GetWorldPosition(edgeData.From);
+				var to = graph.GetWorldPosition(edgeData.To);
+				var dir = (to - from).normalized;
+				dir = Vector3.Cross(dir, graph.transform.up);
+				selectionLines.Add(from - dir*.025f);
+				selectionLines.Add(to - dir*.025f);
+				
+				/*var dir = graph.transform.up * .1f;
+				selectionLines.Add(graph.GetWorldPosition(edgeData.From)+dir);
+				selectionLines.Add(graph.GetWorldPosition(edgeData.To)+dir);*/
 			}
 			Handles.DrawLines(selectionLines.ToArray());
 			
