@@ -10,7 +10,7 @@ namespace Cartographer.Core
 		public event Action<GraphBehaviour> OnLoad;
 		[SerializeField] public bool showGizmos;
 		[SerializeField] public GraphData data;
-		[SerializeField] private List<Vector3> positions = new List<Vector3>();
+		[SerializeField] private List<Vector3> localPositions = new List<Vector3>();
 
 		public int Count => data != null?data.Count:0;
 		public int EdgesCount => data.Edges.Count;
@@ -23,7 +23,7 @@ namespace Cartographer.Core
 				Unregister(data);
 			}
 			
-			positions.Clear();
+			localPositions.Clear();
 			data = newData;
 			
 			if (data != null)
@@ -31,7 +31,7 @@ namespace Cartographer.Core
 				Register(data);
 				for (int i = 0; i < data.Count; i++)
 				{
-					positions.Add(Vector3.zero);
+					localPositions.Add(Vector3.zero);
 				}
 			}
 			
@@ -54,46 +54,46 @@ namespace Cartographer.Core
 
 		private void OnNodeSwapped(int from, int to)
 		{
-			(positions[from], positions[to]) = (positions[to], positions[from]);
+			(localPositions[from], localPositions[to]) = (localPositions[to], localPositions[from]);
 		}
 
 		private void OnNodeRemoved()
 		{
-			positions.RemoveAt(positions.Count - 1);
+			localPositions.RemoveAt(localPositions.Count - 1);
 		}
 
 		private void OnNodeAdded()
 		{
-			positions.Add(Vector3.zero);
+			localPositions.Add(Vector3.zero);
 		}
 
 		public IEnumerable<Vector3> GetWorldPositions()
 		{
-			foreach (Vector3 position in positions)
+			foreach (Vector3 position in localPositions)
 			{
 				yield return transform.TransformPoint(position);
 			}
 		}
 
-		public IEnumerable<Vector3> GetLocalPositions() => positions;
+		public IEnumerable<Vector3> GetLocalPositions() => localPositions;
 
-		public Vector3 GetLocalPosition(int i) => positions[i];
+		public Vector3 GetLocalPosition(int i) => localPositions[i];
 
-		public Vector3 GetWorldPosition(int i) => transform.TransformPoint(positions[i]);
+		public Vector3 GetWorldPosition(int i) => transform.TransformPoint(localPositions[i]);
 
 		public void Remove(int index) => data.RemoveNode(index);
 
-		public void SetWorldPosition(int selectedIndex, Vector3 newPosition) => positions[selectedIndex] = transform.InverseTransformPoint(newPosition);
+		public void SetWorldPosition(int selectedIndex, Vector3 newPosition) => localPositions[selectedIndex] = transform.InverseTransformPoint(newPosition);
 
 		public void SetLocalPosition(int selectedIndex, Vector3 newPosition)
 		{
 			try
 			{
-				positions[selectedIndex] = newPosition;
+				localPositions[selectedIndex] = newPosition;
 			}
 			catch
 			{
-				Debug.Log($"{selectedIndex}/{positions.Count}");
+				Debug.Log($"{selectedIndex}/{localPositions.Count}");
 				throw;
 			}
 		}
@@ -109,7 +109,7 @@ namespace Cartographer.Core
 		{
 			int index = data.AddNode();
 			//Debug.Log($"AddNodeAtLocalPosition: {index}: {localPosition}");
-			positions[index] = localPosition;
+			localPositions[index] = localPosition;
 			return index;
 		}
 
