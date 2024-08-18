@@ -121,8 +121,8 @@ namespace Cartographer.Core
 
 		public bool TryGetContent(int index, out NodeData nodeData) => (nodeData = GetContent(index)) != null;
 
-		public IEnumerable<EdgeData> FindAllEdgeIn(int id) => data.FindInEdges(id);
-		public IEnumerable<EdgeData> FindAllEdgeOut(int id) => data.FindOutEdges(id);
+		public IEnumerable<EdgeData> FindEdgesTo(int id) => data.FindEdgesTo(id);
+		public IEnumerable<EdgeData> FindEdgesFrom(int id) => data.FindOutEdges(id);
 
 		public void OnBeforeSerialize()
 		{

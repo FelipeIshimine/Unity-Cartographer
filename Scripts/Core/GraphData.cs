@@ -20,7 +20,7 @@ namespace Cartographer.Core
 		[field:SerializeField] public List<EdgeData> Edges = new();
 		[field:SerializeReference,TypeDropdown] public List<NodeData> Content = new();
 
-		public IEnumerable<EdgeData> FindInEdges(int index) => Edges.Where(x => x.To == index);
+		public IEnumerable<EdgeData> FindEdgesTo(int index) => Edges.Where(x => x.To == index);
 
 		public IEnumerable<EdgeData> FindOutEdges(int index) => Edges.Where(x => x.From == index);
 		
@@ -215,5 +215,26 @@ namespace Cartographer.Core
 			RemoveNode(targetIndex);
 		}
 
+		public void FindAllPathsTo(int i, ref HashSet<EdgeData> visited)
+		{
+			foreach (var edge in FindEdgesTo(i))
+			{
+				if (visited.Add(edge))
+				{
+					FindAllPathsTo(edge.From, ref visited);
+				}
+			}
+		}
+
+		public void FindAllPathsFrom(int i, ref HashSet<EdgeData> visited)
+		{
+			foreach (var edge in FindOutEdges(i))
+			{
+				if (visited.Add(edge))
+				{
+					FindAllPathsFrom(edge.To, ref visited);
+				}
+			}
+		}
 	}
 }

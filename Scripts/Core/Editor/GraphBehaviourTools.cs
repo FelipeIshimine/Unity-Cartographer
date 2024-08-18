@@ -36,8 +36,8 @@ namespace Cartographer.Core.Editor
 
 		public static GraphBehaviourTools Instance { get; private set; }
 
-		private readonly HashSet<EdgeData> connectionsOut = new HashSet<EdgeData>();
-		private readonly HashSet<EdgeData> connectionsIn = new HashSet<EdgeData>();
+		private HashSet<EdgeData> connectionsOut = new HashSet<EdgeData>();
+		private HashSet<EdgeData> connectionsIn = new HashSet<EdgeData>();
 
 		private int selectedIndex = -1;
 		public int SelectedIndex
@@ -60,33 +60,12 @@ namespace Cartographer.Core.Editor
 			connectionsOut.Clear();
 			if (selectedIndex != -1)
 			{
-				FindAllConnectionsOut(selectedIndex);
-				FindAllConnectionsIn(selectedIndex);
+				graph.data.FindAllPathsFrom(selectedIndex, ref connectionsOut);
+				graph.data.FindAllPathsTo(selectedIndex, ref connectionsIn);
 			}
 		}
 
-		private void FindAllConnectionsIn(int i)
-		{
-			foreach (var edge in GetGraph().FindAllEdgeIn(i))
-			{
-				if (connectionsIn.Add(edge))
-				{
-					FindAllConnectionsIn(edge.From);
-				}
-			}
-			
-		}
-
-		private void FindAllConnectionsOut(int i)
-		{
-			foreach (var edge in GetGraph().FindAllEdgeOut(i))
-			{
-				if (connectionsOut.Add(edge))
-				{
-					FindAllConnectionsOut(edge.To);
-				}
-			}
-		}
+	
 
 		public GraphBehaviour graph;
 		public GraphBehaviour GetGraph() => graph;
