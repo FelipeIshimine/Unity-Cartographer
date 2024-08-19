@@ -250,5 +250,7 @@ namespace Cartographer.Core
 			data = default;
 			return false;
 		}
+
+		public bool HasChildren(int node) => Edges.Exists(x => x.From == node);
 	}
 }
