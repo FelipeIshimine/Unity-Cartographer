@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 namespace Cartographer.Core
@@ -12,7 +13,7 @@ namespace Cartographer.Core
 		[SerializeField] public GraphData data;
 		[SerializeField] private List<Vector3> localPositions = new List<Vector3>();
 
-		public int Count => data != null?data.Count:0;
+		public int Count => data?.Count ?? 0;
 		public int EdgesCount => data.Edges.Count;
 		public IEnumerable<EdgeData> Edges => data.Edges;
 
@@ -137,5 +138,16 @@ namespace Cartographer.Core
 		{
 			Load(new GraphData());
 		}
+
+		public IEnumerable<int> GetEveryIndex()
+		{
+			for (int i = 0; i < Count; i++)
+			{
+				yield return i;
+			}
+		}
+
+		public bool TryFindEdge(int from, int to, out EdgeData edge) => data.TryFindEdge(from,to, out edge);
+
 	}
 }

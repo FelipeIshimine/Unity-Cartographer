@@ -236,5 +236,19 @@ namespace Cartographer.Core
 				}
 			}
 		}
+
+		public bool TryFindEdge(int from, int to, out EdgeData data)
+		{
+			foreach (EdgeData edgeData in FindOutEdges(from))
+			{
+				if (edgeData.To == to)
+				{
+					data = edgeData;
+					return true;
+				}
+			}
+			data = default;
+			return false;
+		}
 	}
 }
