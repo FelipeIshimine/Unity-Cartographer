@@ -18,7 +18,7 @@ namespace Cartographer.Core
 		public int EdgesCount => data.Edges.Count;
 		public IEnumerable<EdgeData> Edges => data.Edges;
 
-		public void Load(GraphData newData)
+		public void Load(GraphData newData, List<Vector3> positions)
 		{
 			if (data != null)
 			{
@@ -26,15 +26,16 @@ namespace Cartographer.Core
 			}
 			
 			localPositions.Clear();
+			localPositions.AddRange(positions);
 			data = newData;
 			
 			if (data != null)
 			{
 				Register(data);
-				for (int i = 0; i < data.Count; i++)
+				/*for (int i = 0; i < data.Count; i++)
 				{
 					localPositions.Add(Vector3.zero);
-				}
+				}*/
 			}
 			
 			OnLoad?.Invoke(this);
@@ -129,7 +130,7 @@ namespace Cartographer.Core
 		public bool TryGetContent(int index, out NodeData nodeData) => (nodeData = GetContent(index)) != null;
 
 		public IEnumerable<EdgeData> FindEdgesTo(int id) => data.FindEdgesTo(id);
-		public IEnumerable<EdgeData> FindEdgesFrom(int id) => data.FindOutEdges(id);
+		public IEnumerable<EdgeData> FindEdgesFrom(int id) => data.FindEdgesFrom(id);
 
 		public void OnBeforeSerialize()
 		{
@@ -142,7 +143,7 @@ namespace Cartographer.Core
 
 		public void Clear()
 		{
-			Load(new GraphData());
+			Load(new GraphData(), new List<Vector3>());
 		}
 
 		public IEnumerable<int> GetEveryIndex()

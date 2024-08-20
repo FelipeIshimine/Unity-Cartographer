@@ -22,7 +22,7 @@ namespace Cartographer.Core
 
 		public IEnumerable<EdgeData> FindEdgesTo(int index) => Edges.Where(x => x.To == index);
 
-		public IEnumerable<EdgeData> FindOutEdges(int index) => Edges.Where(x => x.From == index);
+		public IEnumerable<EdgeData> FindEdgesFrom(int index) => Edges.Where(x => x.From == index);
 		
 		public IEnumerable<int> FindInIndices(int index)
 		{
@@ -228,7 +228,7 @@ namespace Cartographer.Core
 
 		public void FindAllPathsFrom(int i, ref HashSet<EdgeData> visited)
 		{
-			foreach (var edge in FindOutEdges(i))
+			foreach (var edge in FindEdgesFrom(i))
 			{
 				if (visited.Add(edge))
 				{
@@ -239,7 +239,7 @@ namespace Cartographer.Core
 
 		public bool TryFindEdge(int from, int to, out EdgeData data)
 		{
-			foreach (EdgeData edgeData in FindOutEdges(from))
+			foreach (EdgeData edgeData in FindEdgesFrom(from))
 			{
 				if (edgeData.To == to)
 				{
