@@ -8,6 +8,7 @@ namespace Cartographer.Core
 {
 	public class GraphBehaviour : MonoBehaviour, ISerializationCallbackReceiver
 	{
+		public event Action<int> OnPositionUpdate; 
 		public event Action<GraphBehaviour> OnLoad;
 		[SerializeField] public bool showGizmos;
 		[SerializeField] public GraphData data;
@@ -84,13 +85,18 @@ namespace Cartographer.Core
 
 		public void Remove(int index) => data.RemoveNode(index);
 
-		public void SetWorldPosition(int selectedIndex, Vector3 newPosition) => localPositions[selectedIndex] = transform.InverseTransformPoint(newPosition);
+		public void SetWorldPosition(int selectedIndex, Vector3 newPosition)
+		{
+			localPositions[selectedIndex] = transform.InverseTransformPoint(newPosition);
+			OnPositionUpdate?.Invoke(selectedIndex);
+		}
 
 		public void SetLocalPosition(int selectedIndex, Vector3 newPosition)
 		{
 			try
 			{
 				localPositions[selectedIndex] = newPosition;
+				OnPositionUpdate?.Invoke(selectedIndex);
 			}
 			catch
 			{
