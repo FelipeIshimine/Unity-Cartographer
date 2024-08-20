@@ -34,13 +34,14 @@ namespace Core.Attributes.Editor
 		{
 			TypeDropdownAttribute dropdownAttribute = (TypeDropdownAttribute)attribute;
 			
-			if(property.hasVisibleChildren)
+			if(property.hasVisibleChildren && property.hasChildren)
 			{
 				var propertyField = new PropertyField(property, property.displayName)
 				{
 					style = { flexGrow = 1 },
 					name = "Field"
 				};
+				//propertyField.BindProperty(property);
 				propertyContainer.Add(propertyField);
 			}
 			else
