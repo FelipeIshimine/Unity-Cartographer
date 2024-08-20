@@ -20,6 +20,17 @@ namespace Cartographer.Core
 		[field:SerializeField] public List<EdgeData> Edges = new();
 		[field:SerializeReference,TypeDropdown] public List<NodeData> Content = new();
 
+		public GraphData()
+		{
+		}
+		
+		public GraphData(GraphData graph)
+		{
+			Edges = new List<EdgeData>(graph.Edges);
+			Content = new (graph.Content);
+			Count = graph.Count;
+		}
+
 		public IEnumerable<EdgeData> FindEdgesTo(int index) => Edges.Where(x => x.To == index);
 
 		public IEnumerable<EdgeData> FindEdgesFrom(int index) => Edges.Where(x => x.From == index);
