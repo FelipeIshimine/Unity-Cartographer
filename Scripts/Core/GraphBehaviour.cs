@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using UnityEngine;
 
@@ -155,6 +156,74 @@ namespace Cartographer.Core
 		}
 
 		public bool TryFindEdge(int from, int to, out EdgeData edge) => data.TryFindEdge(from,to, out edge);
+
+		public bool TryFindDistance(int from, int to,out int distance)
+		{
+			bool result = TryFindPath(from, to, out List<int> path);
+			Debug.Log($"{result} : {path.Count}");
+			distance = result ? path.Count - 1: -1;
+			return result;
+		}
+		
+		
+		public bool TryFindPath(int from, int to, out List<int> path)
+		{
+			path = new List<int>();
+
+			int[][] adjacencies = new int[Count][];
+			
+			int[] cost = new int[Count];
+			int[] previous = new int[Count];
+
+			for (int i = 0; i < Count; i++)
+			{
+				cost[i] = int.MaxValue;
+				previous[i] = -1;
+				adjacencies[i] = data.FindEdgesFrom(from).Select(x => x.To).ToArray();
+			}
+
+			Queue<int> queue = new Queue<int>();
+			queue.Enqueue(from);
+			cost[from] = 0;
+			
+			while (queue.Count > 0)
+			{
+				int current = queue.Dequeue();
+
+				if (current == to)
+				{
+					break;
+				}
+
+				int nextCost = cost[current]+1;
+				foreach (int i in adjacencies[from])
+				{
+					if (nextCost < cost[i])
+					{
+						queue.Enqueue(i);
+						cost[i] = nextCost;
+						previous[i] = current;
+					}
+				}
+				
+			}
+
+			if (previous[to] == -1)
+			{
+				return false;
+			}
+
+			while (to != from)
+			{
+				path.Add(to);
+				to = previous[to];
+			}
+			
+			path.Add(from);
+
+			path.Reverse();
+			return true;
+		}
 
 	}
 }
