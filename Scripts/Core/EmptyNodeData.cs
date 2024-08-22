@@ -1,6 +1,6 @@
 ﻿namespace Cartographer.Core
 {
-	public class EmptyNodeData : NodeData
+	public record EmptyNodeData : NodeData
 	{
 	}
 }
