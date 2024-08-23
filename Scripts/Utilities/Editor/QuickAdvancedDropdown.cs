@@ -47,7 +47,7 @@ namespace Cartographer.Utilities.Editor
 					{
 						item = pathToDropdownItems[s] = new AdvancedDropdownItem(s)
 						{
-							id = dictionaries[s]
+							id = dictionaries[labels[i]]
 						};
 						previous.AddChild(item);
 					}
