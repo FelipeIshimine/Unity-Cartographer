@@ -3,5 +3,6 @@
 	public interface INodeDataSource
 	{
 		public NodeData CreateNodeData();
+		string GetDisplayName();
 	}
 }
