@@ -43,10 +43,10 @@ namespace Cartographer.Utilities
 
 
 	[Serializable]
-	public struct OptionalReference<T>
+	public class OptionalReference<T>
 	{
-		[SerializeField] private bool isEnabled;
-		[SerializeReference,TypeDropdown] private T value;
+		[SerializeField] public bool isEnabled;
+		[SerializeReference,TypeDropdown] public T value;
 
 		public bool IsEnabled
 		{

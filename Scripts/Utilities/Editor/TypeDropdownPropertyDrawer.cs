@@ -41,12 +41,16 @@ namespace Core.Attributes.Editor
 					style = { flexGrow = 1 },
 					name = "Field"
 				};
+				
+				propertyField.TrackPropertyValue(property, x=> propertyField.label =property.displayName);
 				//propertyField.BindProperty(property);
 				propertyContainer.Add(propertyField);
 			}
 			else
 			{
-				propertyContainer.Add(new Label(property.displayName));
+				var label = new Label(property.displayName);
+				label.TrackPropertyValue(property, x=> label.text = property.displayName);
+				propertyContainer.Add(label);
 			}
 
 			EditorToolbarDropdown typeBtn = null;
