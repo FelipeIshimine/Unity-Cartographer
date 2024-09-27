@@ -64,7 +64,7 @@ namespace Core.Attributes.Editor
 						height = 18,
 						position = Position.Absolute,
 						left = new StyleLength(StyleKeyword.Auto),
-						right = 0,
+						right = 18,
 					}
 				};
 			}
@@ -81,7 +81,24 @@ namespace Core.Attributes.Editor
 					}
 				};
 			}
+
+			ToolbarButton clearButton = new ToolbarButton(()=>
+			{
+				property.managedReferenceValue = null;
+				property.serializedObject.ApplyModifiedProperties();
+			})
+			{
+				text = "X",
+				style =
+				{
+				height = 18,
+				width = 18,
+				position = Position.Relative,
+				flexGrow = 0
+			}
+			};
 			propertyContainer.Add(typeBtn);
+			propertyContainer.Add(clearButton);
 		}
 
 		private string GetButtonLabel(SerializedProperty p)
