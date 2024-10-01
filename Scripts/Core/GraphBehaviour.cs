@@ -179,13 +179,13 @@ namespace Cartographer.Core
 			{
 				cost[i] = int.MaxValue;
 				previous[i] = -1;
-				adjacencies[i] = data.FindEdgesFrom(from).Select(x => x.To).ToArray();
+				adjacencies[i] = data.FindEdgesFrom(i).Select(x => x.To).ToArray();
 			}
 
 			Queue<int> queue = new Queue<int>();
 			queue.Enqueue(from);
 			cost[from] = 0;
-			
+
 			while (queue.Count > 0)
 			{
 				int current = queue.Dequeue();
@@ -196,7 +196,7 @@ namespace Cartographer.Core
 				}
 
 				int nextCost = cost[current]+1;
-				foreach (int i in adjacencies[from])
+				foreach (int i in adjacencies[current])
 				{
 					if (nextCost < cost[i])
 					{
@@ -207,7 +207,6 @@ namespace Cartographer.Core
 				}
 				
 			}
-
 			if (previous[to] == -1)
 			{
 				return false;
