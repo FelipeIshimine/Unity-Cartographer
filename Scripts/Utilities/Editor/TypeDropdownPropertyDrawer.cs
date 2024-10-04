@@ -23,7 +23,7 @@ namespace Core.Attributes.Editor
 
 			var container = new VisualElement()
 			{
-				style = { flexDirection = FlexDirection.Row }
+				style = { flexDirection = FlexDirection.Column }
 			};
 			CreatePropertyField(container, property);
 			return container;
@@ -32,55 +32,31 @@ namespace Core.Attributes.Editor
 
 		private void CreatePropertyField(VisualElement propertyContainer, SerializedProperty property)
 		{
-			TypeDropdownAttribute dropdownAttribute = (TypeDropdownAttribute)attribute;
-			
-			if(property.hasVisibleChildren && property.hasChildren)
+			Foldout foldout = new Foldout
 			{
-				var propertyField = new PropertyField(property, property.displayName)
-				{
-					style = { flexGrow = 1 },
-					name = "Field"
-				};
-				
-				propertyField.TrackPropertyValue(property, x=> propertyField.label =property.displayName);
-				//propertyField.BindProperty(property);
-				propertyContainer.Add(propertyField);
-			}
-			else
-			{
-				var label = new Label(property.displayName);
-				label.TrackPropertyValue(property, x=> label.text = property.displayName);
-				propertyContainer.Add(label);
-			}
+				text = property.displayName,
+				value = false
+			};
 
-			EditorToolbarDropdown typeBtn = null;
+			Toolbar toolbar = new Toolbar()
+			{
+				style = { flexGrow = 0, flexShrink = 0, alignSelf = Align.FlexEnd}
+			};
+			ToolbarButton typeBtn = null;
 			
-			if(dropdownAttribute.UseAbsolutePosition)
+			typeBtn = new ToolbarButton(() => TypeDropdownClicked(typeBtn, property))
 			{
-				typeBtn = new EditorToolbarDropdown(GetButtonLabel(property), () => TypeDropdownClicked(typeBtn, property))
+				text = GetButtonLabel(property),
+				style =
 				{
-					style =
-					{
-						height = 18,
-						position = Position.Absolute,
-						left = new StyleLength(StyleKeyword.Auto),
-						right = 18,
-					}
-				};
-			}
-			else
-			{
-				typeBtn = new EditorToolbarDropdown(GetButtonLabel(property),
-					() => TypeDropdownClicked(typeBtn, property))
-				{
-					style =
-					{
-						height = 18,
-						position = Position.Relative,
-						flexGrow = 1
-					}
-				};
-			}
+					position = Position.Relative,
+					flexGrow = 0,
+					flexShrink = 0,
+					paddingLeft = 2,
+					paddingRight = 2,
+					unityTextAlign = TextAnchor.MiddleCenter
+				}
+			};
 
 			ToolbarButton clearButton = new ToolbarButton(()=>
 			{
@@ -91,14 +67,41 @@ namespace Core.Attributes.Editor
 				text = "X",
 				style =
 				{
-				height = 18,
-				width = 18,
+				width = 16,
 				position = Position.Relative,
-				flexGrow = 0
+				flexGrow = 0,
+				marginLeft = 0,
+				marginRight = 0,
+				paddingLeft = 0,
+				paddingRight = 0,
+				unityTextAlign = TextAnchor.MiddleCenter
 			}
 			};
-			propertyContainer.Add(typeBtn);
-			propertyContainer.Add(clearButton);
+			
+			toolbar.Add(typeBtn);
+			toolbar.Add(clearButton);
+			//propertyContainer.Add(toolbar);
+			propertyContainer.Add(foldout);
+
+			var toggle=foldout.Q<Toggle>();
+			toggle.Add(toolbar);
+			
+			void RefreshContent(SerializedProperty x)
+			{
+				toggle.value = foldout.value = x.isExpanded;
+				foldout.contentContainer.Clear();
+				foreach (SerializedProperty childrenProperty in x.FindChildrenProperties())
+				{
+					foldout.Add(new PropertyField(childrenProperty));
+				}
+
+				bool show = foldout.contentContainer.childCount > 0;
+				toggle.Q<VisualElement>("unity-checkmark").style.visibility = show? Visibility.Visible: Visibility.Hidden;
+			}
+
+			foldout.TrackPropertyValue(property, RefreshContent);
+            
+			RefreshContent(property.Copy());
 		}
 
 		private string GetButtonLabel(SerializedProperty p)
@@ -149,7 +152,7 @@ namespace Core.Attributes.Editor
 
 		}
 
-		private void TypeDropdownClicked(EditorToolbarDropdown typeBtn, SerializedProperty property)
+		private void TypeDropdownClicked(ToolbarButton typeBtn, SerializedProperty property)
 		{
 			var targetType = GetTargetType();
 			var baseTypeName = GetDisplayName(targetType);
@@ -220,29 +223,28 @@ namespace Core.Attributes.Editor
 			return targetType;
 		}
 
-		void OnTypeSelected(int index, EditorToolbarDropdown typeBtn, SerializedProperty property, Type[] typesArray)
+		void OnTypeSelected(int index, Button typeBtn, SerializedProperty property, Type[] typesArray)
 		{
 			property.managedReferenceValue = Activator.CreateInstance(typesArray[index]);
 			property.serializedObject.ApplyModifiedProperties();
 			typeBtn.text = GetButtonLabel(property);
 			typeBtn.parent.Bind(property.serializedObject);
 		}
-
-		static bool IsSubclassOfRawGeneric(Type generic, Type toCheck)
-		{
-			while (toCheck != null && toCheck != typeof(object))
+	}
+	
+	public static class SerializedPropertyExtensions
+	{
+		public static IEnumerable<SerializedProperty> FindChildrenProperties(this SerializedProperty parent, int depth = 1) {
+			var depthOfParent = parent.depth;
+			foreach (object current in parent)
 			{
-				var cur = toCheck.IsGenericType ? toCheck.GetGenericTypeDefinition() : toCheck;
-				if (generic == cur)
+				if (current is not SerializedProperty childProperty)
 				{
-					return true;
+					continue;
 				}
-
-				toCheck = toCheck.BaseType;
+				if (childProperty.depth > depthOfParent + depth) continue;
+				yield return childProperty.Copy();
 			}
-
-			return false;
 		}
-
 	}
 }
