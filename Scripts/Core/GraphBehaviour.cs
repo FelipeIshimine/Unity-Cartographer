@@ -160,7 +160,7 @@ namespace Cartographer.Core
 		public bool TryFindDistance(int from, int to,out int distance)
 		{
 			bool result = TryFindPath(from, to, out List<int> path);
-			Debug.Log($"{result} : {path.Count}");
+			//Debug.Log($"{result} : {path.Count}");
 			distance = result ? path.Count - 1: -1;
 			return result;
 		}
